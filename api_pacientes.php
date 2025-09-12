@@ -1,14 +1,43 @@
 <?php
+// Siempre enviar headers CORS y Content-Type antes de cualquier salida
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-// API para registrar un nuevo paciente en la tabla pacientes
-header('Content-Type: application/json');
+
+// Capturar errores fatales y enviar JSON con CORS
+set_exception_handler(function($e) {
+    http_response_code(500);
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Error del servidor: ' . $e->getMessage()]);
+    exit();
+});
 require_once __DIR__ . '/config.php';
+
+// Eliminar paciente (DELETE)
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    // Obtener el id desde la query string
+    parse_str($_SERVER['QUERY_STRING'] ?? '', $params);
+    $id = isset($params['id']) ? intval($params['id']) : 0;
+    if ($id > 0) {
+        $stmt = $conn->prepare("DELETE FROM pacientes WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Error al eliminar paciente: ' . $stmt->error]);
+        }
+        $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'error' => 'ID de paciente no válido']);
+    }
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -59,6 +88,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Si se quiere listar pacientes, se puede agregar aquí un GET
+
+// Listar todos los pacientes (GET)
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $result = $conn->query("SELECT id, historia_clinica, nombre, apellido, fecha_nacimiento, dni, creado_en FROM pacientes ORDER BY id DESC");
+    $pacientes = [];
+    while ($row = $result->fetch_assoc()) {
+        // Calcular edad si hay fecha de nacimiento
+        if (!empty($row['fecha_nacimiento'])) {
+            $birth = new DateTime($row['fecha_nacimiento']);
+            $today = new DateTime();
+            $edad = $today->diff($birth)->y;
+        } else {
+            $edad = null;
+        }
+        $row['edad'] = $edad;
+        $pacientes[] = $row;
+    }
+    echo json_encode(['success' => true, 'pacientes' => $pacientes]);
+    exit;
+}
+
 http_response_code(405);
 echo json_encode(['success' => false, 'error' => 'Método no permitido']);

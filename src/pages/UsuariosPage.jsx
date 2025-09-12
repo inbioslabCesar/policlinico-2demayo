@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import UsuarioList from "../components/UsuarioList";
 
 const roles = [
   "administrador",
@@ -131,54 +132,11 @@ function UsuariosPage() {
     }
     setLoading(false);
   };
-
+  
   return (
     <div className="container py-4">
-      <h2 className="h4 fw-bold mb-4">Usuarios</h2>
-      {error && <div className="alert alert-danger mb-2">{error}</div>}
-      <button className="btn btn-success mb-4" onClick={() => { setShowForm(true); setEditando(null); }}>Nuevo usuario</button>
-      {showForm && (
-        <UsuarioForm
-          usuario={editando}
-          onSave={handleSave}
-          onCancel={() => { setShowForm(false); setEditando(null); }}
-        />
-      )}
-      {loading ? <div>Cargando...</div> : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover align-middle bg-white mt-4">
-            <thead className="table-light">
-              <tr>
-                <th>Usuario</th>
-                <th>Nombre</th>
-                <th>DNI</th>
-                <th>Profesión</th>
-                <th>Rol</th>
-                <th>Activo</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map(u => (
-                <tr key={u.id} className="text-center">
-                  <td>{u.usuario}</td>
-                  <td>{u.nombre}</td>
-                  <td>{u.dni}</td>
-                  <td>{u.profesion}</td>
-                  <td>{u.rol}</td>
-                  <td>{u.activo ? 'Sí' : 'No'}</td>
-                  <td>
-                    <div className="d-flex gap-2 justify-content-center">
-                      <button className="btn btn-primary btn-sm" onClick={() => { setEditando(u); setShowForm(true); }}>Editar</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u.id)}>Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <h2 className="mb-4 text-2xl font-bold text-purple-800">Gestión de Usuarios</h2>
+      <UsuarioList />
     </div>
   );
 }

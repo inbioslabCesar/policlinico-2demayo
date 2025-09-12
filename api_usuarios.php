@@ -69,6 +69,24 @@ switch ($_SERVER['REQUEST_METHOD']) {
         }
         break;
     case 'DELETE':
+        // Eliminar usuario por id recibido por parámetro (query string)
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $stmt = $mysqli->prepare('DELETE FROM usuarios WHERE id = ?');
+            $stmt->bind_param('i', $id);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true]);
+            } else {
+                http_response_code(400);
+                echo json_encode(['error' => 'No se pudo eliminar el usuario']);
+            }
+            $stmt->close();
+        } else {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de usuario requerido para eliminar']);
+        }
+        break;
+    case 'DELETE':
         parse_str(file_get_contents('php://input'), $data);
         $id = $data['id'] ?? null;
         if ($id) {

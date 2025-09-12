@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PacienteForm from "../components/PacienteForm";
 import PacienteList from "../components/PacienteList";
 
 function PacientesPage() {
@@ -16,7 +15,6 @@ function PacientesPage() {
 
   return (
     <div>
-      <PacienteForm onPacienteCreado={agregarPaciente} />
       <PacienteList pacientes={pacientes} />
     </div>
   );

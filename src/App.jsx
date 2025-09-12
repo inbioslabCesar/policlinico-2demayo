@@ -1,11 +1,13 @@
 
 
 
-import { useState, useEffect } from "react";
-import { BrowserRouter } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import DashboardLayout from "./components/DashboardLayout";
 import Dashboard from "./components/Dashboard";
+import PacientesPage from "./pages/PacientesPage";
+import UsuariosPage from "./pages/UsuariosPage";
 
 
 function App() {
@@ -32,7 +34,12 @@ function App() {
     <BrowserRouter>
       {usuario ? (
         <DashboardLayout usuario={usuario} onLogout={handleLogout}>
-          <Dashboard usuario={usuario} />
+          <Routes>
+            <Route path="/" element={<Dashboard usuario={usuario} />} />
+            <Route path="/pacientes" element={<PacientesPage />} />
+            <Route path="/usuarios" element={<UsuariosPage />} />
+            {/* Puedes agregar más rutas aquí */}
+          </Routes>
         </DashboardLayout>
       ) : (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-800 via-blue-500 to-green-400">
