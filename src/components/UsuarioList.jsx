@@ -100,17 +100,17 @@ function UsuarioList() {
       ) : error ? (
         <div className="text-red-600">{error}</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border">
+        <div className="overflow-x-auto w-full">
+          <table className="min-w-full text-xs md:text-sm border">
             <thead>
               <tr className="bg-blue-100">
                 <th className="px-2 py-1 border">Usuario</th>
                 <th className="px-2 py-1 border">Nombre</th>
-                <th className="px-2 py-1 border">DNI</th>
-                <th className="px-2 py-1 border">Profesión</th>
+                <th className="px-2 py-1 border hidden md:table-cell">DNI</th>
+                <th className="px-2 py-1 border hidden md:table-cell">Profesión</th>
                 <th className="px-2 py-1 border">Rol</th>
-                <th className="px-2 py-1 border">Estado</th>
-                <th className="px-2 py-1 border">Creado</th>
+                <th className="px-2 py-1 border hidden md:table-cell">Estado</th>
+                <th className="px-2 py-1 border hidden md:table-cell">Creado</th>
                 <th className="px-2 py-1 border">Acciones</th>
               </tr>
             </thead>
@@ -119,11 +119,11 @@ function UsuarioList() {
                 <tr key={u.id} className="hover:bg-blue-50">
                   <td className="border px-2 py-1">{u.usuario}</td>
                   <td className="border px-2 py-1">{u.nombre}</td>
-                  <td className="border px-2 py-1">{u.dni}</td>
-                  <td className="border px-2 py-1">{u.profesion}</td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{u.dni}</td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{u.profesion}</td>
                   <td className="border px-2 py-1">{u.rol}</td>
-                  <td className="border px-2 py-1">{u.activo === 1 || u.activo === "1" ? "Activo" : "Inactivo"}</td>
-                  <td className="border px-2 py-1">{u.creado_en ? u.creado_en.split(" ")[0] : ""}</td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{u.activo === 1 || u.activo === "1" ? "Activo" : "Inactivo"}</td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{u.creado_en ? u.creado_en.split(" ")[0] : ""}</td>
                   <td className="border px-2 py-1 flex gap-2">
                     <button onClick={() => handleEditar(u)} className="bg-yellow-400 text-white px-2 py-1 rounded">Editar</button>
                     <button onClick={() => handleEliminar(u.id)} className="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>

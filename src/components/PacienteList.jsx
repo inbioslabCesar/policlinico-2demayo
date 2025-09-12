@@ -182,14 +182,14 @@ function PacienteList() {
         <div className="text-red-600">{error}</div>
       ) : (
         <>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border">
+        <div className="overflow-x-auto w-full">
+          <table className="min-w-full text-xs md:text-sm border">
             <thead>
               <tr className="bg-blue-100">
                 <th className="px-2 py-1 border">Historia Clínica</th>
                 <th className="px-2 py-1 border">Nombres</th>
-                <th className="px-2 py-1 border">Apellidos</th>
-                <th className="px-2 py-1 border">Edad</th>
+                <th className="px-2 py-1 border hidden md:table-cell">Apellidos</th>
+                <th className="px-2 py-1 border hidden md:table-cell">Edad</th>
                 <th className="px-2 py-1 border">DNI</th>
                 <th className="px-2 py-1 border">Acciones</th>
               </tr>
@@ -199,8 +199,8 @@ function PacienteList() {
                 <tr key={p.id} className="hover:bg-blue-50">
                   <td className="border px-2 py-1">{p.historia_clinica}</td>
                   <td className="border px-2 py-1">{p.nombre}</td>
-                  <td className="border px-2 py-1">{p.apellido}</td>
-                  <td className="border px-2 py-1">{p.edad !== null ? p.edad : '-'} </td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{p.apellido}</td>
+                  <td className="border px-2 py-1 hidden md:table-cell">{p.edad !== null ? p.edad : '-'} </td>
                   <td className="border px-2 py-1">{p.dni}</td>
                   <td className="border px-2 py-1 flex gap-2">
                     <button onClick={() => handleEditar(p)} className="bg-yellow-400 text-white px-2 py-1 rounded">Editar</button>
