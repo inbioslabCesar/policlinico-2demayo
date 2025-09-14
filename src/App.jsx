@@ -1,32 +1,45 @@
-
-
-
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./components/Login";
 import DashboardLayout from "./components/DashboardLayout";
 import Dashboard from "./components/Dashboard";
 import PacientesPage from "./pages/PacientesPage";
 import UsuariosPage from "./pages/UsuariosPage";
+import AgendarConsultaPage from "./pages/AgendarConsultaPage";
+import MedicoConsultasPage from "./pages/MedicoConsultasPage";
+import MedicosPage from "./pages/MedicosPage";
+import PanelMedicoPage from "./pages/PanelMedicoPage";
+import HistoriaClinicaPage from "./historia_clinica/HistoriaClinicaPage";
 
 
 function App() {
   const [usuario, setUsuario] = useState(() => {
-    // Restaurar usuario desde localStorage si existe
-    const stored = localStorage.getItem('usuario');
-    return stored ? JSON.parse(stored) : null;
+    // Restaurar usuario o medico desde sessionStorage si existe
+    const storedUsuario = sessionStorage.getItem('usuario');
+    const storedMedico = sessionStorage.getItem('medico');
+    if (storedUsuario) return JSON.parse(storedUsuario);
+    if (storedMedico) return JSON.parse(storedMedico);
+    return null;
   });
 
-  // Al hacer logout, limpiar localStorage
+  // Al hacer logout, limpiar sessionStorage
   const handleLogout = () => {
     setUsuario(null);
-    localStorage.removeItem('usuario');
+    sessionStorage.removeItem('usuario');
+    sessionStorage.removeItem('medico');
   };
 
   useEffect(() => {
-    // Si cambia el usuario, sincronizar localStorage
+    // Si cambia el usuario, sincronizar sessionStorage
     if (usuario) {
-      localStorage.setItem('usuario', JSON.stringify(usuario));
+      if (usuario.rol === 'medico') {
+        sessionStorage.setItem('medico', JSON.stringify(usuario));
+        sessionStorage.removeItem('usuario');
+      } else {
+        sessionStorage.setItem('usuario', JSON.stringify(usuario));
+        sessionStorage.removeItem('medico');
+      }
     }
   }, [usuario]);
 
@@ -38,6 +51,19 @@ function App() {
             <Route path="/" element={<Dashboard usuario={usuario} />} />
             <Route path="/pacientes" element={<PacientesPage />} />
             <Route path="/usuarios" element={<UsuariosPage />} />
+            <Route path="/agendar-consulta" element={<AgendarConsultaPage />} />
+            {/* Solo visible para médicos */}
+            {usuario?.rol === 'medico' && (
+              <>
+                <Route path="/mis-consultas" element={<MedicoConsultasPage />} />
+                <Route path="/panel-medico" element={<PanelMedicoPage />} />
+                <Route path="/historia-clinica/:pacienteId" element={<HistoriaClinicaPage />} />
+              </>
+            )}
+            {/* Solo visible para administradores */}
+            {usuario?.rol === 'administrador' && (
+              <Route path="/medicos" element={<MedicosPage />} />
+            )}
             {/* Puedes agregar más rutas aquí */}
           </Routes>
         </DashboardLayout>

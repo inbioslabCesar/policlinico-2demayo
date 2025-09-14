@@ -1,4 +1,8 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { BASE_URL } from "../config/config";
+import Swal from 'sweetalert2';
 
 const servicios = [
   { key: "consulta", label: "Consulta Médica" },
@@ -12,14 +16,34 @@ const servicios = [
 
 // Se espera que usuario_id esté disponible en localStorage/session o como prop
 function ServiciosSelector({ paciente }) {
+  const navigate = useNavigate();
+  const [medicos, setMedicos] = useState([]);
+  const [disponibilidad, setDisponibilidad] = useState([]);
+  const [consultas, setConsultas] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Cargar médicos, disponibilidad y consultas solo para consulta médica
+    setLoading(true);
+    Promise.all([
+      fetch(BASE_URL + "api_medicos.php").then(r => r.json()),
+      fetch(BASE_URL + "api_disponibilidad_medicos.php").then(r => r.json()),
+      fetch(BASE_URL + "api_consultas.php").then(r => r.json())
+    ]).then(([m, d, c]) => {
+      setMedicos(m.medicos || []);
+      setDisponibilidad(d.disponibilidad || []);
+      setConsultas(c.consultas || []);
+      setLoading(false);
+    });
+  }, []);
   const handleSeleccion = async (servicio) => {
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    const usuario = JSON.parse(sessionStorage.getItem('usuario')) || JSON.parse(sessionStorage.getItem('medico'));
     if (!usuario || !usuario.id) {
       alert('No se encontró el usuario logueado.');
       return;
     }
     try {
-      const res = await fetch('/api_atenciones.php', {
+  const res = await fetch(BASE_URL + 'api_atenciones.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -31,10 +55,34 @@ function ServiciosSelector({ paciente }) {
       });
       const data = await res.json();
       if (data.success) {
-        alert(`Atención registrada. Redirigiendo a módulo: ${servicio.label}`);
-        // Aquí puedes hacer la redirección real según el servicio
+        if (servicio.key === "consulta") {
+          Swal.fire({
+            title: 'Atención registrada',
+            text: '¿Desea agendar la consulta médica ahora?',
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, agendar',
+            cancelButtonText: 'No'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/agendar-consulta", { state: { pacienteId: paciente.id } });
+            }
+          });
+        } else {
+          Swal.fire({
+            title: 'Atención registrada',
+            text: `Atención registrada para ${servicio.label}.`,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+        }
       } else {
-        alert('Error al registrar atención: ' + (data.error || '')); 
+        Swal.fire({
+          title: 'Error',
+          text: data.error || 'Error al registrar atención',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
       }
     } catch (err) {
       alert('Error de conexión con el servidor.');

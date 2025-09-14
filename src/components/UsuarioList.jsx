@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Swal from 'sweetalert2';
 import UsuarioForm from "./UsuarioForm";
 import { BASE_URL } from "../config/config";
 
@@ -30,6 +31,9 @@ function UsuarioList() {
   const [editData, setEditData] = useState(null);
   const [saving, setSaving] = useState(false);
   const [filtroRol, setFiltroRol] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(1);
 
   const fetchUsuarios = () => {
     setLoading(true);
@@ -58,10 +62,28 @@ function UsuarioList() {
     setModalOpen(true);
   };
   const handleEliminar = (id) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este usuario?")) return;
-  fetch(BASE_URL + `api_usuarios.php?id=${id}`, { method: "DELETE" })
-      .then(res => res.json())
-      .then(() => fetchUsuarios());
+    Swal.fire({
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(BASE_URL + `api_usuarios.php?id=${id}`, { method: "DELETE" })
+          .then(res => res.json())
+          .then((data) => {
+            if (data.success) {
+              Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
+              fetchUsuarios();
+            } else {
+              Swal.fire('Error', data.error || 'Error al eliminar usuario', 'error');
+            }
+          })
+          .catch(() => Swal.fire('Error', 'Error de conexión con el servidor', 'error'));
+      }
+    });
   };
   const handleSave = (form) => {
     setSaving(true);
@@ -81,17 +103,113 @@ function UsuarioList() {
   };
 
   const roles = ["", "administrador", "medico", "enfermero", "recepcionista", "laboratorista", "quimico"];
-  const usuariosFiltrados = filtroRol ? usuarios.filter(u => u.rol === filtroRol) : usuarios;
+  let usuariosFiltrados = usuarios.filter(u => {
+    const texto = busqueda.trim().toLowerCase();
+    if (filtroRol && u.rol !== filtroRol) return false;
+    if (!texto) return true;
+    return (
+      (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
+      (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
+      (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
+      (u.profesion && u.profesion.toLowerCase().includes(texto))
+    );
+  });
+  const totalRows = usuariosFiltrados.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const startIdx = (page - 1) * rowsPerPage;
+  const endIdx = startIdx + rowsPerPage;
+  const usuariosPagina = usuariosFiltrados.slice(startIdx, endIdx);
 
+  // Exportar a Excel
+  const exportarExcel = (usuariosFiltrados) => {
+    import("xlsx").then(XLSX => {
+      const ws = XLSX.utils.json_to_sheet(usuariosFiltrados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      import("file-saver").then(({ saveAs }) => {
+        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(blob, `usuarios_${new Date().toISOString().slice(0,10)}.xlsx`);
+      });
+    });
+  };
+  // Exportar a PDF
+  const exportarPDF = (usuariosFiltrados) => {
+    import("jspdf").then(jsPDF => {
+      import("jspdf-autotable").then(autoTable => {
+        const doc = new jsPDF.default();
+        doc.text("Usuarios", 14, 10);
+        const columns = [
+          { header: "Usuario", dataKey: "usuario" },
+          { header: "Nombre", dataKey: "nombre" },
+          { header: "DNI", dataKey: "dni" },
+          { header: "Profesión", dataKey: "profesion" },
+          { header: "Rol", dataKey: "rol" },
+          { header: "Estado", dataKey: "activo" },
+          { header: "Creado", dataKey: "creado_en" }
+        ];
+        const data = usuariosFiltrados.map(u => ({
+          ...u,
+          activo: u.activo === 1 || u.activo === "1" ? "Activo" : "Inactivo",
+          creado_en: u.creado_en ? u.creado_en.split(" ")[0] : ""
+        }));
+        autoTable.default(doc, {
+          columns,
+          body: data,
+          startY: 18,
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [59, 130, 246] }
+        });
+        doc.save(`usuarios_${new Date().toISOString().slice(0,10)}.pdf`);
+      });
+    });
+  };
   return (
     <div className="p-4 bg-white rounded shadow">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-2">
         <h2 className="text-xl font-bold text-purple-800">Usuarios</h2>
-        <button onClick={handleAgregar} className="bg-blue-500 text-white px-4 py-2 rounded font-bold">Agregar usuario</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            placeholder="Buscar por usuario, nombre, DNI, profesión..."
+            value={busqueda}
+            onChange={e => { setBusqueda(e.target.value); setPage(1); }}
+            className="border rounded px-3 py-2"
+          />
+          <button onClick={handleAgregar} className="bg-blue-500 text-white px-4 py-2 rounded font-bold">Agregar usuario</button>
+          <button onClick={() => {
+            const texto = busqueda.trim().toLowerCase();
+            const filtrados = usuarios.filter(u => {
+              if (filtroRol && u.rol !== filtroRol) return false;
+              if (!texto) return true;
+              return (
+                (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
+                (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
+                (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
+                (u.profesion && u.profesion.toLowerCase().includes(texto))
+              );
+            });
+            exportarExcel(filtrados);
+          }} className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">Exportar Excel</button>
+          <button onClick={() => {
+            const texto = busqueda.trim().toLowerCase();
+            const filtrados = usuarios.filter(u => {
+              if (filtroRol && u.rol !== filtroRol) return false;
+              if (!texto) return true;
+              return (
+                (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
+                (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
+                (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
+                (u.profesion && u.profesion.toLowerCase().includes(texto))
+              );
+            });
+            exportarPDF(filtrados);
+          }} className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">Exportar PDF</button>
+        </div>
       </div>
       <div className="mb-2">
         <label className="mr-2">Filtrar por rol:</label>
-        <select value={filtroRol} onChange={e => setFiltroRol(e.target.value)} className="border rounded px-2 py-1">
+        <select value={filtroRol} onChange={e => { setFiltroRol(e.target.value); setPage(1); }} className="border rounded px-2 py-1">
           {roles.map(r => <option key={r} value={r}>{r ? r.charAt(0).toUpperCase() + r.slice(1) : "Todos"}</option>)}
         </select>
       </div>
@@ -115,7 +233,7 @@ function UsuarioList() {
               </tr>
             </thead>
             <tbody>
-              {usuariosFiltrados.map(u => (
+              {usuariosPagina.map(u => (
                 <tr key={u.id} className="hover:bg-blue-50">
                   <td className="border px-2 py-1">{u.usuario}</td>
                   <td className="border px-2 py-1">{u.nombre}</td>
@@ -132,6 +250,20 @@ function UsuarioList() {
               ))}
             </tbody>
           </table>
+          {/* Controles de paginación */}
+          <div className="flex items-center justify-between mt-4">
+            <div>
+              <label className="mr-2">Filas por página:</label>
+              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border rounded px-2 py-1">
+                {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Anterior</button>
+              <span>Página {page} de {totalPages || 1}</span>
+              <button onClick={() => setPage(p => p < totalPages ? p + 1 : p)} disabled={page >= totalPages} className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Siguiente</button>
+            </div>
+          </div>
         </div>
       )}
       <UsuarioModal open={modalOpen} onClose={() => setModalOpen(false)} initialData={editData} onSave={handleSave} loading={saving} />

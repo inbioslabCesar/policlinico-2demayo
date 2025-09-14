@@ -1,3 +1,60 @@
+# Notificaciones por Email al Agendar Consulta
+
+## Objetivo
+Enviar automáticamente un email tanto al paciente como al médico cada vez que se agenda una consulta médica.
+
+## Flujo propuesto
+1. **Al agendar una consulta** (en el backend, por ejemplo en `api_consultas.php`):
+	- Obtener los datos del paciente (nombre, email, fecha/hora de la consulta, etc.) usando el `paciente_id`.
+	- Obtener los datos del médico (nombre, email) usando el `medico_id`.
+	- Preparar el contenido del email para cada uno (puede ser diferente para paciente y médico).
+	- Usar una librería de envío de emails en PHP, como [PHPMailer](https://github.com/PHPMailer/PHPMailer), para enviar los correos.
+
+2. **Configuración SMTP**
+	- Configurar los datos SMTP en el servidor (puede ser Gmail, Outlook, SendGrid, etc.).
+	- Guardar las credenciales de forma segura (idealmente en un archivo de configuración fuera del repo).
+
+3. **Ejemplo de código (PHP + PHPMailer)**
+```php
+// ...lógica para obtener $paciente y $medico...
+use PHPMailer\PHPMailer\PHPMailer;
+require 'PHPMailer/PHPMailer.php';
+require 'PHPMailer/SMTP.php';
+
+$mail = new PHPMailer();
+$mail->isSMTP();
+$mail->Host = 'smtp.tuservidor.com';
+$mail->SMTPAuth = true;
+$mail->Username = 'usuario@tuservidor.com';
+$mail->Password = 'tu_password';
+$mail->SMTPSecure = 'tls';
+$mail->Port = 587;
+
+// Email al paciente
+$mail->setFrom('notificaciones@policlinico.com', 'Policlínico 2 de Mayo');
+$mail->addAddress($paciente['email'], $paciente['nombre']);
+$mail->Subject = 'Confirmación de consulta médica';
+$mail->Body = "Hola {$paciente['nombre']}, su consulta ha sido agendada para el {$fecha} a las {$hora} con el Dr. {$medico['nombre']}.";
+$mail->send();
+
+// Email al médico
+$mail->clearAddresses();
+$mail->addAddress($medico['email'], $medico['nombre']);
+$mail->Subject = 'Nueva consulta agendada';
+$mail->Body = "Doctor {$medico['nombre']}, tiene una nueva consulta con el paciente {$paciente['nombre']} el {$fecha} a las {$hora}.";
+$mail->send();
+```
+
+## Consideraciones
+- El envío de emails puede hacerse en segundo plano para no demorar la respuesta al usuario.
+- Es importante validar que los emails existan antes de intentar enviar.
+- Puedes personalizar el contenido y formato del email (HTML, adjuntos, etc.).
+- Si usas Gmail u otro proveedor, puede que debas generar una contraseña de aplicación o activar acceso a apps menos seguras.
+
+## Alternativas
+- Para WhatsApp o SMS, se requiere integración con APIs externas (Twilio, WhatsApp Business API, etc.) y suelen tener costo por mensaje.
+
+---
 # Instalación y configuración de Tailwind CSS en este proyecto
 
 Esta guía documenta los pasos y problemas resueltos para instalar Tailwind CSS correctamente en un proyecto Vite + React con "type": "module" en package.json.
@@ -115,5 +172,184 @@ Este módulo permite la gestión de pacientes en la recepción del policlínico,
 - El backend valida y devuelve mensajes claros si falta algún campo obligatorio.
 - El campo `fecha_nacimiento` acepta valores nulos.
 - El sistema maneja correctamente CORS y persistencia de sesión de usuario.
+- constraseña bd mysql hostinger = 'poli2deMayo12-09-25'
 
+<?php
+// Conexión centralizada para MySQL
+$mysqli = new mysqli('localhost', 'u330560936_poli2demayo', 'poli2deMayo12-09-25', 'u330560936_2demayo');
+if ($mysqli->connect_errno) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Error de conexión a la base de datos']);
+    exit;
+}
+// Alias para compatibilidad
+$conn = $mysqli;
+
+
+
+ruta local 
+export const BASE_URL = "http://localhost/policlinico-2demayo/";
+ruta hsotinguer
+export const BASE_URL = "https://darkcyan-gnu-615778.hostingersite.com/";
 ---
+Flujo de Consulta Médica
+El médico/especialista define su disponibilidad:
+
+Desde su panel, el médico selecciona los días y horarios en los que puede atender consultas.
+Puede agregar, modificar o eliminar bloques de disponibilidad.
+Esta información se guarda en la base de datos (tabla disponibilidad_medicos).
+La recepcionista/admin visualiza la disponibilidad:
+
+Desde su panel, la recepcionista puede ver la lista de médicos y sus horarios disponibles.
+Solo la recepcionista/admin tiene acceso a esta vista.
+Recepción de cita:
+
+La recepcionista busca al paciente (ya registrado).
+Selecciona el servicio de consulta médica.
+El sistema muestra los médicos disponibles y sus horarios.
+La recepcionista agenda la cita en un horario disponible.
+El sistema verifica que el médico no tenga otra consulta pendiente en ese horario.
+El médico ve sus consultas pendientes:
+
+Desde su panel, el médico puede ver la lista de consultas agendadas y su estado (pendiente, completada, cancelada).
+Puede marcar una consulta como completada.
+Estructura de Base de Datos (sugerida)
+medicos
+
+id
+nombre
+especialidad
+...otros datos
+disponibilidad_medicos
+
+id
+medico_id (FK a medicos)
+dia_semana (ej: lunes, martes, etc.)
+hora_inicio
+hora_fin
+consultas
+
+id
+paciente_id (FK a pacientes)
+medico_id (FK a medicos)
+fecha
+hora
+estado (pendiente, completada, cancelada)
+...otros datos
+Componentes/Endpoints React y PHP
+Panel Médico:
+
+Formulario para definir disponibilidad.
+Vista de consultas pendientes.
+Panel Recepcionista/Admin:
+
+Vista de disponibilidad de médicos.
+Formulario para agendar consulta (elige paciente, médico, fecha y hora).
+Validación de disponibilidad en tiempo real.
+Endpoints PHP:
+
+api_disponibilidad_medicos.php (GET/POST/PUT/DELETE)
+api_consultas.php (GET/POST/PUT para agendar y actualizar estado)
+api_medicos.php (GET para listar médicos)
+
+
+13-09-25 sql que se agregagn la bd
+
+- ALTER TABLE disponibilidad_medicos ADD COLUMN fecha DATE NULL AFTER medico_id;
+-- Supón que esta semana es del 15 al 19 de septiembre de 2025
+INSERT INTO disponibilidad_medicos (medico_id, fecha, hora_inicio, hora_fin)
+VALUES
+(1, '2025-09-15', '16:00:00', '18:00:00'), -- lunes
+(1, '2025-09-17', '16:00:00', '18:00:00'), -- miércoles
+(1, '2025-09-19', '16:00:00', '18:00:00'); -- viernes
+
+## Disponibilidad de Médicos: por fecha exacta y por día de semana
+
+El sistema permite registrar la disponibilidad de los médicos de dos formas:
+
+- **Por día de semana**: El médico atiende todos los lunes, martes, etc. (recurrente)
+- **Por fecha exacta**: El médico solo atiende en fechas específicas (por ejemplo, solo ciertos días de este mes)
+
+### 1. Estructura recomendada de la tabla
+
+Asegúrate de que tu tabla `disponibilidad_medicos` tenga ambos campos:
+
+```sql
+CREATE TABLE disponibilidad_medicos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  medico_id INT NOT NULL,
+  fecha DATE NULL,
+  dia_semana ENUM('lunes','martes','miércoles','jueves','viernes','sábado','domingo') NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL
+);
+```
+
+- Si `fecha` tiene valor, la disponibilidad es solo para ese día.
+- Si solo tiene `dia_semana`, es recurrente todas las semanas.
+
+### 2. Ejemplo: Disponibilidad recurrente (todos los lunes)
+
+```sql
+INSERT INTO disponibilidad_medicos (medico_id, dia_semana, hora_inicio, hora_fin)
+VALUES (1, 'lunes', '08:00:00', '12:00:00');
+```
+
+### 3. Ejemplo: Disponibilidad solo para fechas concretas
+
+```sql
+INSERT INTO disponibilidad_medicos (medico_id, fecha, hora_inicio, hora_fin)
+VALUES
+(1, '2025-09-15', '16:00:00', '18:00:00'), -- lunes
+(1, '2025-09-17', '16:00:00', '18:00:00'), -- miércoles
+(1, '2025-09-19', '16:00:00', '18:00:00'); -- viernes
+```
+
+### 4. Lógica en el sistema
+
+- Si el campo `fecha` está lleno, solo se muestra esa disponibilidad para ese día exacto.
+- Si solo tiene `dia_semana`, se asume que es recurrente todas las semanas.
+- El frontend y backend ya soportan ambos casos.
+
+### 5. Ejemplo: Varios médicos el mismo día
+
+```sql
+INSERT INTO disponibilidad_medicos (medico_id, fecha, hora_inicio, hora_fin)
+VALUES
+(1, '2025-09-15', '16:00:00', '18:00:00'),
+(2, '2025-09-15', '09:00:00', '13:00:00');
+```
+
+Así puedes controlar la agenda de cada médico de forma flexible.
+
+
+Aquí tienes la estructura de pasos para implementar el módulo de disponibilidad avanzada (soporta varios horarios por día):
+
+Diseñar estructura de datos y endpoints
+
+Permitir varios bloques de horario por fecha para un médico.
+Definir endpoints PHP/REST para crear, listar y eliminar bloques.
+Crear formulario React para seleccionar fechas y horarios
+
+Permitir seleccionar una o varias fechas.
+Permitir agregar varios bloques de horario por fecha (ej: 08:00-10:00 y 16:00-18:00 el mismo día).
+Permitir agregar/eliminar bloques dinámicamente.
+Implementar lógica de guardado en frontend
+
+Al guardar, enviar todos los bloques seleccionados al backend.
+Implementar endpoint PHP para guardar disponibilidad
+
+Recibir y guardar múltiples bloques (fecha, hora_inicio, hora_fin) para el médico.
+Mostrar disponibilidad guardada en el panel del médico
+
+Listar todos los bloques registrados, permitiendo eliminar o editar cada uno.
+
+Comenzamos con el primer paso: estructura de datos y endpoints.
+
+La tabla disponibilidad_medicos ya soporta múltiples bloques por fecha y médico (campos: medico_id, fecha, hora_inicio, hora_fin).
+Para soportar varios bloques el mismo día, simplemente insertas varios registros con la misma fecha y medico_id, pero diferentes horarios.
+Endpoints recomendados:
+
+GET api_disponibilidad_medicos.php?medico_id=ID → Lista todos los bloques de un médico.
+POST api_disponibilidad_medicos.php → Recibe un array de bloques: [{fecha, hora_inicio, hora_fin}, ...] y los inserta.
+DELETE api_disponibilidad_medicos.php?id=ID → Elimina un bloque específico.

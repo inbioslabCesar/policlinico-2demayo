@@ -13,27 +13,41 @@ function Login({ onLogin }) {
     e.preventDefault();
     setError("");
     try {
-      const res = await fetch(BASE_URL + "api_login.php", {
+      // 1. Intentar login como usuario normal
+      let res = await fetch(BASE_URL + "api_login.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, password })
       });
-      const data = await res.json();
+      let data = await res.json();
       if (res.ok && data.success) {
-        // Guardar usuario en localStorage
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+        sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
         onLogin && onLogin(data.usuario);
         navigate("/");
-      } else {
-        setError(data.error || "Usuario o contraseña incorrectos");
+        return;
       }
+      // 2. Si falla, intentar como médico (email)
+      res = await fetch(BASE_URL + "api_login_medico.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: usuario, password })
+      });
+      data = await res.json();
+      if (res.ok && data.success) {
+        const medicoConRol = { ...data.medico, rol: 'medico' };
+        sessionStorage.setItem('medico', JSON.stringify(medicoConRol));
+        onLogin && onLogin(medicoConRol);
+        navigate("/");
+        return;
+      }
+      setError("Usuario o contraseña incorrectos");
     } catch (err) {
       setError("Error de conexión con el servidor");
     }
   };
 
   return (
-    <div className="flex justify-center py-24 bg-gradient-to-br from-purple-800 via-blue-500 to-green-400 min-h-[400px]">
+  <div className="flex justify-center items-center min-h-0 md:min-h-screen py-8">
       <div className="w-full max-w-sm bg-white/95 rounded-xl border border-blue-400 shadow-lg p-6">
         <div className="flex flex-col items-center mb-4">
           <img src="/2demayo.svg" alt="Logo Policlínico" className="h-14 w-14 object-contain bg-white rounded-full p-1 mb-2 shadow" />
@@ -43,7 +57,7 @@ function Login({ onLogin }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             type="text"
-            placeholder="Usuario"
+            placeholder="Usuario o email del médico"
             value={usuario}
             onChange={(e) => setUsuario(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-blue-400"

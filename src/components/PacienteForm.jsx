@@ -3,11 +3,16 @@ import { BASE_URL } from "../config/config";
 
 function PacienteForm({ initialData = {}, onRegistroExitoso }) {
   const [form, setForm] = useState({
+    id: initialData.id || undefined,
     dni: initialData.dni || "",
     nombre: initialData.nombre || "",
     apellido: initialData.apellido || "",
     historia_clinica: initialData.historia_clinica || "",
     fecha_nacimiento: initialData.fecha_nacimiento || "",
+    edad: initialData.edad || "",
+    edad_unidad: initialData.edad_unidad || "años",
+    procedencia: initialData.procedencia || "",
+    tipo_seguro: initialData.tipo_seguro || "",
     sexo: initialData.sexo || "M",
     direccion: initialData.direccion || "",
     telefono: initialData.telefono || "",
@@ -16,16 +21,28 @@ function PacienteForm({ initialData = {}, onRegistroExitoso }) {
 
   React.useEffect(() => {
     setForm({
+      id: initialData.id || undefined,
       dni: initialData.dni || "",
       nombre: initialData.nombre || "",
       apellido: initialData.apellido || "",
       historia_clinica: initialData.historia_clinica || "",
       fecha_nacimiento: initialData.fecha_nacimiento || "",
+      edad: initialData.edad || "",
+      edad_unidad: initialData.edad_unidad || "años",
+      procedencia: initialData.procedencia || "",
+      tipo_seguro: initialData.tipo_seguro || "",
       sexo: initialData.sexo || "M",
       direccion: initialData.direccion || "",
       telefono: initialData.telefono || "",
       email: initialData.email || "",
     });
+      <input
+        name="tipo_seguro"
+        value={form.tipo_seguro}
+        onChange={handleChange}
+        placeholder="Tipo de seguro (opcional)"
+        className="border rounded px-2 py-1 md:col-span-2"
+      />
   }, [initialData]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,10 +68,10 @@ function PacienteForm({ initialData = {}, onRegistroExitoso }) {
       if (data.success && data.paciente) {
         onRegistroExitoso(data.paciente);
       } else {
-        setError(data.error || "Error al registrar paciente");
+        setError(data.error || (form.id ? "Error al actualizar paciente" : "Error al registrar paciente"));
       }
     } catch {
-      setError("Error de conexión con el servidor");
+      setError(form.id ? "Error de conexión al actualizar" : "Error de conexión al registrar");
     }
     setLoading(false);
   };
@@ -104,6 +121,39 @@ function PacienteForm({ initialData = {}, onRegistroExitoso }) {
         type="date"
         className="border rounded px-2 py-1"
       />
+      <div className="flex gap-2 md:col-span-2">
+        <input
+          name="edad"
+          value={form.edad}
+          onChange={handleChange}
+          placeholder="Edad"
+          className="border rounded px-2 py-1 w-24"
+        />
+        <select
+          name="edad_unidad"
+          value={form.edad_unidad}
+          onChange={handleChange}
+          className="border rounded px-2 py-1"
+        >
+          <option value="días">Días</option>
+          <option value="meses">Meses</option>
+          <option value="años">Años</option>
+        </select>
+      </div>
+      <input
+        name="procedencia"
+        value={form.procedencia}
+        onChange={handleChange}
+        placeholder="Procedencia"
+        className="border rounded px-2 py-1 md:col-span-2"
+      />
+      <input
+        name="tipo_seguro"
+        value={form.tipo_seguro}
+        onChange={handleChange}
+        placeholder="Tipo de seguro Ejem:(sis, essalud)"
+        className="border rounded px-2 py-1 md:col-span-2"
+      />
       <select
         name="sexo"
         value={form.sexo}
@@ -141,7 +191,9 @@ function PacienteForm({ initialData = {}, onRegistroExitoso }) {
         className="bg-purple-800 text-white rounded px-4 py-2 font-bold md:col-span-2"
         disabled={loading}
       >
-        {loading ? "Registrando..." : "Registrar Paciente"}
+        {loading
+          ? (form.id ? "Actualizando..." : "Registrando...")
+          : (form.id ? "Actualizar Paciente" : "Registrar Paciente")}
       </button>
     </form>
   );

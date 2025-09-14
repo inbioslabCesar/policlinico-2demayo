@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "./Footer";
@@ -26,13 +25,25 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
             <h5 className="text-lg font-bold text-purple-800 mb-2">Policlínico 2 de Mayo</h5>
           </div>
           <nav className="flex flex-col gap-2 px-4 flex-1 overflow-y-auto">
-            <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
-            <Link to="/pacientes" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Pacientes</Link>
-            {usuario?.rol === 'administrador' && (
-              <Link to="/usuarios" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Usuarios</Link>
+            {usuario?.rol === 'medico' ? (
+              <>
+                <Link to="/mis-consultas" className="py-2 px-3 rounded-lg text-indigo-700 hover:bg-indigo-100 font-medium" onClick={onClose}>Mis Consultas</Link>
+                <Link to="/panel-medico" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Disponibilidad</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
+                <Link to="/pacientes" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Pacientes</Link>
+                {usuario?.rol === 'administrador' && (
+                  <>
+                    <Link to="/usuarios" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Usuarios</Link>
+                    <Link to="/medicos" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Médicos</Link>
+                  </>
+                )}
+                <Link to="/reportes" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Reportes</Link>
+                <Link to="/configuracion" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Configuración</Link>
+              </>
             )}
-            <Link to="/reportes" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Reportes</Link>
-            <Link to="/configuracion" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Configuración</Link>
           </nav>
           <div className="mt-auto p-4">
             <button onClick={onLogout} className="w-full bg-purple-800 text-white font-bold rounded-lg py-2 shadow hover:bg-blue-500 transition-colors">Cerrar sesión</button>

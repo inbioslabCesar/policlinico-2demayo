@@ -32,7 +32,7 @@ function RecepcionModulo() {
       {showRegistro && !paciente && (
         <div className="mt-4">
           <p className="mb-2 text-blue-700">Paciente no encontrado. ¿Desea registrarlo?</p>
-          <PacienteForm onRegistroExitoso={setPaciente} />
+          <PacienteForm initialData={{}} onRegistroExitoso={setPaciente} />
         </div>
       )}
     </div>

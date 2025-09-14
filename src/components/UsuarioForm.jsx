@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 const roles = [
   "administrador",
-  "medico",
   "enfermero",
   "recepcionista",
   "laboratorista",

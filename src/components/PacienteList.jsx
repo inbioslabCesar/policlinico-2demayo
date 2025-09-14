@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import Swal from 'sweetalert2';
 import PacienteForm from "./PacienteForm";
 import { BASE_URL } from "../config/config";
 import * as XLSX from "xlsx";
@@ -11,6 +12,19 @@ import autoTable from "jspdf-autotable";
 // ...existing code...
 
 function PacienteList() {
+  // Ordenamiento de columnas
+  const [sortBy, setSortBy] = useState("historia_clinica");
+  const [sortDir, setSortDir] = useState("asc");
+
+  const handleSort = (col) => {
+    if (sortBy === col) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(col);
+      setSortDir("asc");
+    }
+    setPage(1);
+  };
   const [pacientes, setPacientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,12 +54,42 @@ function PacienteList() {
   }, []);
 
   const handleAgregar = () => {
-    setEditData(null);
+    setEditData({
+      id: undefined,
+      dni: "",
+      nombre: "",
+      apellido: "",
+      historia_clinica: "",
+      fecha_nacimiento: "",
+      edad: "",
+      edad_unidad: "años",
+      procedencia: "",
+      tipo_seguro: "",
+      sexo: "M",
+      direccion: "",
+      telefono: "",
+      email: "",
+    });
     setModalOpen(true);
   };
 
   const handleEditar = (paciente) => {
-    setEditData(paciente);
+    setEditData({
+      id: paciente.id,
+      dni: paciente.dni || "",
+      nombre: paciente.nombre || "",
+      apellido: paciente.apellido || "",
+      historia_clinica: paciente.historia_clinica || "",
+      fecha_nacimiento: paciente.fecha_nacimiento || "",
+      edad: paciente.edad || "",
+      edad_unidad: paciente.edad_unidad || "años",
+      procedencia: paciente.procedencia || "",
+      tipo_seguro: paciente.tipo_seguro || "",
+      sexo: paciente.sexo || "M",
+      direccion: paciente.direccion || "",
+      telefono: paciente.telefono || "",
+      email: paciente.email || "",
+    });
     setModalOpen(true);
   };
 
@@ -62,24 +106,37 @@ function PacienteList() {
   };
 
   const handleEliminar = (paciente) => {
-    if (!window.confirm("¿Seguro que deseas eliminar este paciente?")) return;
-    fetch(BASE_URL + `api_pacientes.php?id=${paciente.id}`, {
-      method: "DELETE"
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setPacientes(prev => prev.filter(p => p.id !== paciente.id));
-        } else {
-          alert(data.error || "Error al eliminar paciente");
-        }
-      })
-      .catch(() => alert("Error de conexión con el servidor"));
+    Swal.fire({
+      title: '¿Eliminar paciente?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(BASE_URL + "api_pacientes.php", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: paciente.id })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setPacientes(prev => prev.filter(p => p.id !== paciente.id));
+              Swal.fire('Eliminado', 'Paciente eliminado correctamente', 'success');
+            } else {
+              Swal.fire('Error', data.error || 'Error al eliminar paciente', 'error');
+            }
+          })
+          .catch(() => Swal.fire('Error', 'Error de conexión con el servidor', 'error'));
+      }
+    });
   };
 
 
   // Filtrar por búsqueda y fechas (creado_en)
-  const pacientesFiltrados = pacientes.filter(p => {
+  let pacientesFiltrados = pacientes.filter(p => {
     // Filtro de búsqueda (historia_clinica, nombre, apellido, dni)
     const texto = busqueda.trim().toLowerCase();
     if (texto) {
@@ -96,6 +153,17 @@ function PacienteList() {
     if (fechaDesde && fecha < fechaDesde) return false;
     if (fechaHasta && fecha > fechaHasta) return false;
     return true;
+  });
+  // Ordenar
+  pacientesFiltrados = pacientesFiltrados.sort((a, b) => {
+    let vA = a[sortBy], vB = b[sortBy];
+    if (typeof vA === "string") vA = vA.toLowerCase();
+    if (typeof vB === "string") vB = vB.toLowerCase();
+    if (vA === undefined || vA === null) return 1;
+    if (vB === undefined || vB === null) return -1;
+    if (vA < vB) return sortDir === "asc" ? -1 : 1;
+    if (vA > vB) return sortDir === "asc" ? 1 : -1;
+    return 0;
   });
   // Calcular paginación
   const totalRows = pacientesFiltrados.length;
@@ -186,11 +254,12 @@ function PacienteList() {
           <table className="min-w-full text-xs md:text-sm border">
             <thead>
               <tr className="bg-blue-100">
-                <th className="px-2 py-1 border">Historia Clínica</th>
-                <th className="px-2 py-1 border">Nombres</th>
-                <th className="px-2 py-1 border hidden md:table-cell">Apellidos</th>
-                <th className="px-2 py-1 border hidden md:table-cell">Edad</th>
-                <th className="px-2 py-1 border">DNI</th>
+                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("historia_clinica")}>Historia Clínica {sortBy === "historia_clinica" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("nombre")}>Nombres {sortBy === "nombre" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-2 py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("apellido")}>Apellidos {sortBy === "apellido" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-2 py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("edad")}>Edad {sortBy === "edad" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("dni")}>DNI {sortBy === "dni" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("tipo_seguro")}>Tipo de seguro {sortBy === "tipo_seguro" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
                 <th className="px-2 py-1 border">Acciones</th>
               </tr>
             </thead>
@@ -202,6 +271,7 @@ function PacienteList() {
                   <td className="border px-2 py-1 hidden md:table-cell">{p.apellido}</td>
                   <td className="border px-2 py-1 hidden md:table-cell">{p.edad !== null ? p.edad : '-'} </td>
                   <td className="border px-2 py-1">{p.dni}</td>
+                  <td className="border px-2 py-1">{p.tipo_seguro || '-'}</td>
                   <td className="border px-2 py-1 flex gap-2">
                     <button onClick={() => handleEditar(p)} className="bg-yellow-400 text-white px-2 py-1 rounded">Editar</button>
                     <button onClick={() => handleEliminar(p)} className="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>

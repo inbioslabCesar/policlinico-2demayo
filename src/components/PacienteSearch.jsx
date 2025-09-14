@@ -1,4 +1,6 @@
+
 import React, { useState } from "react";
+import { BASE_URL } from "../config/config";
 
 
 function PacienteSearch({ onPacienteEncontrado, onNoEncontrado, onNuevaBusqueda }) {
@@ -9,7 +11,7 @@ function PacienteSearch({ onPacienteEncontrado, onNoEncontrado, onNuevaBusqueda 
     e.preventDefault();
     if (!busqueda.trim()) return;
     try {
-      const res = await fetch('http://localhost/policlinico-2demayo/api_pacientes_buscar.php', {
+  const res = await fetch(BASE_URL + 'api_pacientes_buscar.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo, valor: busqueda })

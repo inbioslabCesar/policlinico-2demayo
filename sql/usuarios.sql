@@ -21,3 +21,7 @@ VALUES (
   'administrador',
   1
 );
+modificar la contraseña del admin
+UPDATE usuarios
+SET password = SHA2('41950361', 256)
+WHERE usuario = 'admin';
