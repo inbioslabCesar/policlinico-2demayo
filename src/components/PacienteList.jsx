@@ -221,17 +221,17 @@ function PacienteList() {
             value={busqueda}
             onChange={e => { setBusqueda(e.target.value); setPage(1); }}
             placeholder="Buscar por historia clínica, nombre, apellido o DNI"
-            className="border rounded px-2 py-1 min-w-[220px]"
+            className="border rounded px-2 py-1 min-w-[140px] md:min-w-[220px]"
           />
           <label className="text-sm font-medium">Filas por página:</label>
-          <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="border rounded px-2 py-1">
+          <select value={rowsPerPage} onChange={handleRowsPerPageChange} className="border rounded px-1 py-0.5 md:px-2 md:py-1">
             <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
           </select>
-          <button onClick={handleAgregar} className="bg-blue-500 text-white px-4 py-2 rounded font-bold ml-2">Agregar paciente</button>
-          <button onClick={exportarExcel} className="bg-green-600 text-white px-3 py-2 rounded font-bold ml-2">Exportar Excel</button>
-          <button onClick={exportarPDF} className="bg-red-600 text-white px-3 py-2 rounded font-bold">Exportar PDF</button>
+          <button onClick={handleAgregar} className="bg-blue-500 text-white px-2 py-1 md:px-4 md:py-2 rounded font-bold ml-2 text-xs md:text-base">Agregar paciente</button>
+          <button onClick={exportarExcel} className="bg-green-600 text-white px-2 py-1 md:px-3 md:py-2 rounded font-bold ml-2 text-xs md:text-base">Exportar Excel</button>
+          <button onClick={exportarPDF} className="bg-red-600 text-white px-2 py-1 md:px-3 md:py-2 rounded font-bold text-xs md:text-base">Exportar PDF</button>
         </div>
       </div>
       {/* Filtro de fechas */}
@@ -254,27 +254,27 @@ function PacienteList() {
           <table className="min-w-full text-xs md:text-sm border">
             <thead>
               <tr className="bg-blue-100">
-                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("historia_clinica")}>Historia Clínica {sortBy === "historia_clinica" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("nombre")}>Nombres {sortBy === "nombre" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("apellido")}>Apellidos {sortBy === "apellido" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("edad")}>Edad {sortBy === "edad" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("dni")}>DNI {sortBy === "dni" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border cursor-pointer" onClick={() => handleSort("tipo_seguro")}>Tipo de seguro {sortBy === "tipo_seguro" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
-                <th className="px-2 py-1 border">Acciones</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border cursor-pointer" onClick={() => handleSort("historia_clinica")}>HC {sortBy === "historia_clinica" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border cursor-pointer" onClick={() => handleSort("nombre")}>Nombre {sortBy === "nombre" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("apellido")}>Apellido {sortBy === "apellido" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell cursor-pointer" onClick={() => handleSort("edad")}>Edad {sortBy === "edad" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border cursor-pointer" onClick={() => handleSort("dni")}>DNI {sortBy === "dni" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border cursor-pointer hidden md:table-cell" onClick={() => handleSort("tipo_seguro")}>Tipo de seguro {sortBy === "tipo_seguro" ? (sortDir === "asc" ? "▲" : "▼") : ""}</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {pacientesPagina.map(p => (
                 <tr key={p.id} className="hover:bg-blue-50">
-                  <td className="border px-2 py-1">{p.historia_clinica}</td>
-                  <td className="border px-2 py-1">{p.nombre}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{p.apellido}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{p.edad !== null ? p.edad : '-'} </td>
-                  <td className="border px-2 py-1">{p.dni}</td>
-                  <td className="border px-2 py-1">{p.tipo_seguro || '-'}</td>
-                  <td className="border px-2 py-1 flex gap-2">
-                    <button onClick={() => handleEditar(p)} className="bg-yellow-400 text-white px-2 py-1 rounded">Editar</button>
-                    <button onClick={() => handleEliminar(p)} className="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1">{p.historia_clinica}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1">{p.nombre}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{p.apellido}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{p.edad !== null ? p.edad : '-'} </td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1">{p.dni}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{p.tipo_seguro || '-'}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 flex gap-1 md:gap-2">
+                    <button onClick={() => handleEditar(p)} className="bg-yellow-400 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Editar</button>
+                    <button onClick={() => handleEliminar(p)} className="bg-red-500 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Eliminar</button>
                   </td>
                 </tr>
               ))}

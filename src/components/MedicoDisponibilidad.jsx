@@ -100,7 +100,7 @@ function MedicoDisponibilidad({ medicoId }) {
     <div className="max-w-xl mx-auto p-4">
       <h2 className="text-lg font-bold mb-2">Disponibilidad semanal</h2>
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2 mb-4">
-        <select name="dia_semana" value={form.dia_semana} onChange={handleChange} className="border rounded px-2 py-1">
+        <select name="dia_semana" value={form.dia_semana} onChange={handleChange} className="border rounded px-1 py-0.5 md:px-2 md:py-1 text-xs md:text-sm">
           <option value="lunes">Lunes</option>
           <option value="martes">Martes</option>
           <option value="miércoles">Miércoles</option>
@@ -109,17 +109,17 @@ function MedicoDisponibilidad({ medicoId }) {
           <option value="sábado">Sábado</option>
           <option value="domingo">Domingo</option>
         </select>
-        <input type="time" name="hora_inicio" value={form.hora_inicio} onChange={handleChange} className="border rounded px-2 py-1" required />
-        <input type="time" name="hora_fin" value={form.hora_fin} onChange={handleChange} className="border rounded px-2 py-1" required />
-        <button type="submit" className="bg-blue-600 text-white rounded px-4 py-1 font-bold">
+        <input type="time" name="hora_inicio" value={form.hora_inicio} onChange={handleChange} className="border rounded px-1 py-0.5 md:px-2 md:py-1 text-xs md:text-sm" required />
+        <input type="time" name="hora_fin" value={form.hora_fin} onChange={handleChange} className="border rounded px-1 py-0.5 md:px-2 md:py-1 text-xs md:text-sm" required />
+        <button type="submit" className="bg-blue-600 text-white rounded px-1 py-0.5 md:px-4 md:py-1 font-bold text-xs md:text-sm">
           {editId ? "Actualizar" : "Agregar"}
         </button>
         {editId && (
-          <button type="button" onClick={() => { setEditId(null); setForm({ dia_semana: "lunes", hora_inicio: "08:00", hora_fin: "12:00" }); }} className="bg-gray-400 text-white rounded px-4 py-1 font-bold">Cancelar</button>
+          <button type="button" onClick={() => { setEditId(null); setForm({ dia_semana: "lunes", hora_inicio: "08:00", hora_fin: "12:00" }); }} className="bg-gray-400 text-white rounded px-1 py-0.5 md:px-4 md:py-1 font-bold text-xs md:text-sm">Cancelar</button>
         )}
       </form>
       {loading ? <div>Cargando...</div> : (
-        <table className="w-full border text-sm">
+  <table className="w-full border text-xs md:text-sm">
           <thead>
             <tr className="bg-gray-100">
               <th>Día</th>
@@ -131,12 +131,12 @@ function MedicoDisponibilidad({ medicoId }) {
           <tbody>
             {disponibilidad.map(d => (
               <tr key={d.id}>
-                <td>{d.dia_semana}</td>
-                <td>{d.hora_inicio}</td>
-                <td>{d.hora_fin}</td>
-                <td>
-                  <button onClick={() => handleEdit(d)} className="text-blue-600 mr-2">Editar</button>
-                  <button onClick={() => handleDelete(d.id)} className="text-red-600">Eliminar</button>
+                <td className="px-1 py-0.5 md:px-2 md:py-1">{d.dia_semana}</td>
+                <td className="px-1 py-0.5 md:px-2 md:py-1">{d.hora_inicio}</td>
+                <td className="px-1 py-0.5 md:px-2 md:py-1">{d.hora_fin}</td>
+                <td className="px-1 py-0.5 md:px-2 md:py-1 flex gap-1 md:gap-2">
+                  <button onClick={() => handleEdit(d)} className="bg-yellow-400 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Editar</button>
+                  <button onClick={() => handleDelete(d.id)} className="bg-red-500 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Eliminar</button>
                 </td>
               </tr>
             ))}

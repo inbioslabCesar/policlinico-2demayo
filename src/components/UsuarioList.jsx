@@ -176,21 +176,7 @@ function UsuarioList() {
             onChange={e => { setBusqueda(e.target.value); setPage(1); }}
             className="border rounded px-3 py-2"
           />
-          <button onClick={handleAgregar} className="bg-blue-500 text-white px-4 py-2 rounded font-bold">Agregar usuario</button>
-          <button onClick={() => {
-            const texto = busqueda.trim().toLowerCase();
-            const filtrados = usuarios.filter(u => {
-              if (filtroRol && u.rol !== filtroRol) return false;
-              if (!texto) return true;
-              return (
-                (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
-                (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
-                (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
-                (u.profesion && u.profesion.toLowerCase().includes(texto))
-              );
-            });
-            exportarExcel(filtrados);
-          }} className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">Exportar Excel</button>
+          <button onClick={handleAgregar} className="bg-blue-500 text-white px-1 py-0.5 md:px-2 md:py-1 rounded font-bold text-xs md:text-sm">Agregar usuario</button>
           <button onClick={() => {
             const texto = busqueda.trim().toLowerCase();
             const filtrados = usuarios.filter(u => {
@@ -204,7 +190,41 @@ function UsuarioList() {
               );
             });
             exportarPDF(filtrados);
-          }} className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">Exportar PDF</button>
+          }} className="bg-red-600 text-white px-1 py-0.5 md:px-2 md:py-1 rounded hover:bg-red-700 text-xs md:text-sm">Exportar PDF</button>
+        </div>
+        {/* Botón Excel solo en móvil */}
+        <div className="block md:hidden mt-2">
+          <button onClick={() => {
+            const texto = busqueda.trim().toLowerCase();
+            const filtrados = usuarios.filter(u => {
+              if (filtroRol && u.rol !== filtroRol) return false;
+              if (!texto) return true;
+              return (
+                (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
+                (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
+                (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
+                (u.profesion && u.profesion.toLowerCase().includes(texto))
+              );
+            });
+            exportarExcel(filtrados);
+          }} className="bg-green-600 text-white px-1 py-0.5 rounded hover:bg-green-700 text-xs w-full">Exportar Excel</button>
+        </div>
+        {/* Botón Excel en desktop */}
+        <div className="hidden md:block">
+          <button onClick={() => {
+            const texto = busqueda.trim().toLowerCase();
+            const filtrados = usuarios.filter(u => {
+              if (filtroRol && u.rol !== filtroRol) return false;
+              if (!texto) return true;
+              return (
+                (u.usuario && u.usuario.toLowerCase().includes(texto)) ||
+                (u.nombre && u.nombre.toLowerCase().includes(texto)) ||
+                (u.dni && String(u.dni).toLowerCase().includes(texto)) ||
+                (u.profesion && u.profesion.toLowerCase().includes(texto))
+              );
+            });
+            exportarExcel(filtrados);
+          }} className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 text-sm">Exportar Excel</button>
         </div>
       </div>
       <div className="mb-2">
@@ -222,46 +242,46 @@ function UsuarioList() {
           <table className="min-w-full text-xs md:text-sm border">
             <thead>
               <tr className="bg-blue-100">
-                <th className="px-2 py-1 border">Usuario</th>
-                <th className="px-2 py-1 border">Nombre</th>
-                <th className="px-2 py-1 border hidden md:table-cell">DNI</th>
-                <th className="px-2 py-1 border hidden md:table-cell">Profesión</th>
-                <th className="px-2 py-1 border">Rol</th>
-                <th className="px-2 py-1 border hidden md:table-cell">Estado</th>
-                <th className="px-2 py-1 border hidden md:table-cell">Creado</th>
-                <th className="px-2 py-1 border">Acciones</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border">Usuario</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border">Nombre</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell">DNI</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell">Profesión</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell">Rol</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell">Estado</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border hidden md:table-cell">Creado</th>
+                <th className="px-1 py-0.5 md:px-2 md:py-1 border">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {usuariosPagina.map(u => (
                 <tr key={u.id} className="hover:bg-blue-50">
-                  <td className="border px-2 py-1">{u.usuario}</td>
-                  <td className="border px-2 py-1">{u.nombre}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{u.dni}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{u.profesion}</td>
-                  <td className="border px-2 py-1">{u.rol}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{u.activo === 1 || u.activo === "1" ? "Activo" : "Inactivo"}</td>
-                  <td className="border px-2 py-1 hidden md:table-cell">{u.creado_en ? u.creado_en.split(" ")[0] : ""}</td>
-                  <td className="border px-2 py-1 flex gap-2">
-                    <button onClick={() => handleEditar(u)} className="bg-yellow-400 text-white px-2 py-1 rounded">Editar</button>
-                    <button onClick={() => handleEliminar(u.id)} className="bg-red-500 text-white px-2 py-1 rounded">Eliminar</button>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1">{u.usuario}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1">{u.nombre}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{u.dni}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{u.profesion}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{u.rol}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{u.activo === 1 || u.activo === "1" ? "Activo" : "Inactivo"}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 hidden md:table-cell">{u.creado_en ? u.creado_en.split(" ")[0] : ""}</td>
+                  <td className="border px-1 py-0.5 md:px-2 md:py-1 flex gap-1 md:gap-2">
+                    <button onClick={() => handleEditar(u)} className="bg-yellow-400 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Editar</button>
+                    <button onClick={() => handleEliminar(u.id)} className="bg-red-500 text-white px-1 py-0.5 md:px-2 md:py-1 rounded text-xs md:text-sm">Eliminar</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {/* Controles de paginación */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-2 text-xs md:text-sm">
             <div>
               <label className="mr-2">Filas por página:</label>
-              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border rounded px-2 py-1">
+              <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }} className="border rounded px-1 py-0.5 md:px-2 md:py-1">
                 {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Anterior</button>
+            <div className="flex items-center gap-1 md:gap-2">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-1 py-0.5 md:px-2 md:py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Anterior</button>
               <span>Página {page} de {totalPages || 1}</span>
-              <button onClick={() => setPage(p => p < totalPages ? p + 1 : p)} disabled={page >= totalPages} className="px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Siguiente</button>
+              <button onClick={() => setPage(p => p < totalPages ? p + 1 : p)} disabled={page >= totalPages} className="px-1 py-0.5 md:px-2 md:py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">Siguiente</button>
             </div>
           </div>
         </div>

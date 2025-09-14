@@ -5,7 +5,7 @@ import ServiciosSelector from "./ServiciosSelector";
 import PacienteForm from "./PacienteForm";
 
 
-function RecepcionModulo() {
+function RecepcionModulo({ onPacienteRegistrado }) {
   const [paciente, setPaciente] = useState(null);
   const [showRegistro, setShowRegistro] = useState(false);
 
@@ -13,6 +13,12 @@ function RecepcionModulo() {
   const handleNuevaBusqueda = () => {
     setPaciente(null);
     setShowRegistro(false);
+  };
+
+  // Callback para cuando se registra un paciente
+  const handleRegistroExitoso = (nuevoPaciente) => {
+    setPaciente(nuevoPaciente);
+    if (onPacienteRegistrado) onPacienteRegistrado();
   };
 
   return (
@@ -32,7 +38,7 @@ function RecepcionModulo() {
       {showRegistro && !paciente && (
         <div className="mt-4">
           <p className="mb-2 text-blue-700">Paciente no encontrado. ¿Desea registrarlo?</p>
-          <PacienteForm initialData={{}} onRegistroExitoso={setPaciente} />
+          <PacienteForm initialData={{}} onRegistroExitoso={handleRegistroExitoso} />
         </div>
       )}
     </div>

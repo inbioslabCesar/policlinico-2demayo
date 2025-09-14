@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../config/config";
 import DisponibilidadMedicos from "./DisponibilidadMedicos";
-
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 function AgendarConsulta({ pacienteId }) {
   const [medicos, setMedicos] = useState([]);
   const [medicoId, setMedicoId] = useState("");
@@ -9,6 +10,7 @@ function AgendarConsulta({ pacienteId }) {
   const [fecha, setFecha] = useState("");
   const [hora, setHora] = useState("");
   const [msg, setMsg] = useState("");
+  const MySwal = withReactContent(Swal);
 
   useEffect(() => {
     fetch(BASE_URL + "api_medicos.php")
@@ -37,18 +39,25 @@ function AgendarConsulta({ pacienteId }) {
     });
     const data = await res.json();
     if (data.success) {
-      setMsg("Consulta agendada correctamente");
+      setMsg("");
+      MySwal.fire({
+        icon: "success",
+        title: "Consulta agendada",
+        text: "¡La consulta fue agendada exitosamente! El paciente ya tiene su cita registrada.",
+        confirmButtonColor: "#22c55e"
+      });
     } else {
       setMsg(data.error || "Error al agendar");
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4">
+  <div className="max-w-2xl mx-auto p-2 md:p-8 w-full overflow-x-auto">
       <DisponibilidadMedicos />
-      <h2 className="text-lg font-bold mb-2">Agendar Consulta Médica</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 mb-4">
-        <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="border rounded px-2 py-1" required />
+      <h2 className="text-xl md:text-2xl font-bold mb-4 text-center">Agendar Consulta Médica</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 md:gap-4 mb-4 bg-white rounded-lg shadow border border-blue-200 p-2 md:p-8 w-full max-w-full text-xs md:text-base">
+        <label className="font-semibold mb-1" htmlFor="fecha-consulta">Fecha de la consulta <span className="text-gray-500">(dd/mm/aaaa)</span></label>
+        <input id="fecha-consulta" type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="border rounded px-3 py-2 md:px-4 md:py-3 text-base md:text-lg" required />
         <select
           value={hora ? `${medicoId}|${hora}` : ""}
           onChange={e => {
@@ -56,7 +65,7 @@ function AgendarConsulta({ pacienteId }) {
             setMedicoId(mid);
             setHora(h);
           }}
-          className="border rounded px-2 py-1"
+          className="border rounded px-3 py-2 md:px-4 md:py-3 text-base md:text-lg"
           required
         >
           <option value="">Selecciona médico y horario</option>
@@ -82,9 +91,9 @@ function AgendarConsulta({ pacienteId }) {
               return options;
             })}
         </select>
-        <button type="submit" className="bg-green-600 text-white rounded px-4 py-1 font-bold">Agendar</button>
+        <button type="submit" className="bg-green-600 text-white rounded px-4 py-2 md:px-6 md:py-3 font-bold text-base md:text-lg">Agendar</button>
       </form>
-      {msg && <div className="mt-2 text-sm text-center">{msg}</div>}
+  {msg && <div className="mt-2 text-base md:text-lg text-center text-green-700">{msg}</div>}
     </div>
   );
 }

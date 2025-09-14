@@ -1,10 +1,8 @@
 import React from "react";
 import MedicoConsultas from "../components/MedicoConsultas";
 
-// El id del médico debe venir del usuario logueado (clave 'medico' en sessionStorage)
-const medicoId = JSON.parse(sessionStorage.getItem('medico'))?.id;
-
-function MedicoConsultasPage() {
+function MedicoConsultasPage({ usuario }) {
+  const medicoId = usuario?.id;
   if (!medicoId) {
     return <div className="text-center mt-10 text-red-600 font-bold">No se encontró el médico logueado.</div>;
   }

@@ -1,18 +1,27 @@
 
+
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import RecepcionModulo from "./RecepcionModulo";
 import { BASE_URL } from "../config/config";
 
+
 function Dashboard({ usuario }) {
   const [ultimaHC, setUltimaHC] = useState(null);
+  const location = useLocation();
 
-  useEffect(() => {
+  // Función para actualizar la última HC desde RecepcionModulo
+  const actualizarUltimaHC = () => {
     fetch(BASE_URL + "api_ultima_hc.php")
       .then(res => res.json())
       .then(data => {
         if (data.success) setUltimaHC(data.ultima_hc);
       });
-  }, []);
+  };
+
+  useEffect(() => {
+    actualizarUltimaHC();
+  }, [usuario, location.pathname]);
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-6 bg-white/95 rounded-xl border border-blue-400 shadow-lg mt-10">
@@ -21,7 +30,7 @@ function Dashboard({ usuario }) {
       {ultimaHC && (
         <div className="mb-4 text-green-700 font-semibold">Última Historia Clínica registrada: <span className="font-mono">{ultimaHC}</span></div>
       )}
-      <RecepcionModulo />
+      <RecepcionModulo onPacienteRegistrado={actualizarUltimaHC} />
     </div>
   );
 }

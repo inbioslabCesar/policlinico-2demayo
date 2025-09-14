@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./components/Login";
 import DashboardLayout from "./components/DashboardLayout";
@@ -48,14 +48,19 @@ function App() {
       {usuario ? (
         <DashboardLayout usuario={usuario} onLogout={handleLogout}>
           <Routes>
-            <Route path="/" element={<Dashboard usuario={usuario} />} />
+            {/* Redirigir a médicos que intenten acceder a '/' */}
+            <Route path="/" element={
+              usuario?.rol === 'medico'
+                ? <Navigate to="/mis-consultas" replace />
+                : <Dashboard usuario={usuario} />
+            } />
             <Route path="/pacientes" element={<PacientesPage />} />
             <Route path="/usuarios" element={<UsuariosPage />} />
             <Route path="/agendar-consulta" element={<AgendarConsultaPage />} />
             {/* Solo visible para médicos */}
             {usuario?.rol === 'medico' && (
               <>
-                <Route path="/mis-consultas" element={<MedicoConsultasPage />} />
+                <Route path="/mis-consultas" element={<MedicoConsultasPage usuario={usuario} />} />
                 <Route path="/panel-medico" element={<PanelMedicoPage />} />
                 <Route path="/historia-clinica/:pacienteId" element={<HistoriaClinicaPage />} />
               </>

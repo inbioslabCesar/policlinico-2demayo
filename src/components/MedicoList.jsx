@@ -212,7 +212,7 @@ function MedicoList() {
             onChange={e => { setBusqueda(e.target.value); setPage(1); }}
             className="border rounded px-3 py-2"
           />
-          <button onClick={handleOpenModal} className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">Nuevo Médico</button>
+          <button onClick={handleOpenModal} className="bg-blue-700 text-white px-1 py-0.5 md:px-2 md:py-1 rounded hover:bg-blue-800 text-xs md:text-sm">Nuevo Médico</button>
           <button onClick={() => {
             const texto = busqueda.trim().toLowerCase();
             const medicosFiltrados = medicos.filter(m => {
@@ -224,7 +224,7 @@ function MedicoList() {
               );
             });
             exportarExcel(medicosFiltrados);
-          }} className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">Exportar Excel</button>
+          }} className="bg-green-600 text-white px-1 py-0.5 md:px-2 md:py-1 rounded hover:bg-green-700 text-xs md:text-sm">Exportar Excel</button>
           <button onClick={() => {
             const texto = busqueda.trim().toLowerCase();
             const medicosFiltrados = medicos.filter(m => {
@@ -236,7 +236,7 @@ function MedicoList() {
               );
             });
             exportarPDF(medicosFiltrados);
-          }} className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">Exportar PDF</button>
+          }} className="bg-red-600 text-white px-1 py-0.5 md:px-2 md:py-1 rounded hover:bg-red-700 text-xs md:text-sm">Exportar PDF</button>
         </div>
       </div>
       {loading ? (

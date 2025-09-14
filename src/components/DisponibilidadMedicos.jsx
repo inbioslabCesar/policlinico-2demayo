@@ -95,7 +95,7 @@ function DisponibilidadMedicos() {
         <Calendar
           onChange={setSelectedDate}
           value={selectedDate}
-          className="border rounded shadow"
+          className="border rounded shadow !text-base w-full max-w-xs md:!text-base md:w-[350px] md:h-[350px] !h-[320px] md:!h-[350px]"
           tileContent={({ date, view }) => {
             if (view !== 'month') return null;
             const bloques = getBloquesParaFecha(date);
@@ -131,14 +131,14 @@ function DisponibilidadMedicos() {
             />
           </div>
           {loading ? <div>Cargando...</div> : (
-            <div className="overflow-x-auto" style={{ maxHeight: 340, minHeight: 120 }}>
-              <table className="min-w-full text-sm border">
+            <div className="overflow-x-auto" style={{ maxHeight: 260, minHeight: 80 }}>
+              <table className="min-w-full text-[11px] md:text-sm border">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-2 py-1">Médico</th>
-                    <th className="px-2 py-1">Especialidad</th>
-                    <th className="px-2 py-1">Horario</th>
-                    <th className="px-2 py-1">Cupos libres</th>
+                    <th className="px-1 py-0.5 md:px-2 md:py-1">Médico</th>
+                    <th className="px-1 py-0.5 md:px-2 md:py-1">Especialidad</th>
+                    <th className="px-1 py-0.5 md:px-2 md:py-1">Horario</th>
+                    <th className="px-1 py-0.5 md:px-2 md:py-1">Cupos libres</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -164,10 +164,10 @@ function DisponibilidadMedicos() {
                     const cupos = slots - agendadas.length;
                     return (
                       <tr key={bloque.medico_id + '-' + i} className={cupos > 0 ? "bg-green-50" : "bg-yellow-100"}>
-                        <td className="px-2 py-1 font-bold" style={{ color: medicoColors[medico.id] || undefined }}>{medico.nombre}</td>
-                        <td className="px-2 py-1">{medico.especialidad}</td>
-                        <td className="px-2 py-1">{bloque.hora_inicio} - {bloque.hora_fin} {fechaBloque ? <span className="text-xs text-gray-500 ml-1">({fechaBloque})</span> : null}</td>
-                        <td className="px-2 py-1 font-bold">{cupos > 0 ? cupos : 'Sin cupos'}</td>
+                        <td className="px-0.5 py-0.5 md:px-2 md:py-1 font-bold" style={{ color: medicoColors[medico.id] || undefined }}>{medico.nombre}</td>
+                        <td className="px-0.5 py-0.5 md:px-2 md:py-1">{medico.especialidad}</td>
+                        <td className="px-0.5 py-0.5 md:px-2 md:py-1">{bloque.hora_inicio} - {bloque.hora_fin} {fechaBloque ? <span className="text-xs text-gray-500 ml-1">({fechaBloque})</span> : null}</td>
+                        <td className="px-0.5 py-0.5 md:px-2 md:py-1 font-bold">{cupos > 0 ? cupos : 'Sin cupos'}</td>
                       </tr>
                     );
                   })}
