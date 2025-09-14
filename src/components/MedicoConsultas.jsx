@@ -5,6 +5,8 @@ import { BASE_URL } from "../config/config";
 function MedicoConsultas({ medicoId }) {
   const navigate = useNavigate();
   const [consultas, setConsultas] = useState([]);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -39,48 +41,114 @@ function MedicoConsultas({ medicoId }) {
       });
   };
 
+  // Calcular datos paginados
+  const totalRows = consultas.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+  const pagedConsultas = consultas.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  // Cambiar página y filas por página
+  const handleRowsPerPage = (e) => {
+    setRowsPerPage(Number(e.target.value));
+    setPage(1);
+  };
+  const handlePrev = () => setPage((p) => Math.max(1, p - 1));
+  const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
+
   return (
-    <div className="max-w-3xl mx-auto p-4">
+    <div className="max-w-3xl mx-auto p-2 sm:p-4">
       <h2 className="text-xl font-bold mb-4 text-center">Mis Consultas Agendadas</h2>
       {loading ? <div>Cargando...</div> : (
-        <table className="min-w-full text-sm border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-2 py-1">Fecha</th>
-              <th className="px-2 py-1">Hora</th>
-              <th className="px-2 py-1">Paciente</th>
-              <th className="px-2 py-1">Estado</th>
-              <th className="px-2 py-1">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {consultas.length === 0 && <tr><td colSpan={5} className="text-center">No hay consultas agendadas</td></tr>}
-            {consultas.map(c => (
-              <tr key={c.id}>
-                <td className="px-2 py-1">{c.fecha}</td>
-                <td className="px-2 py-1">{c.hora}</td>
-                <td className="px-2 py-1">{c.paciente_nombre ? `${c.paciente_nombre} ${c.paciente_apellido}` : `Paciente #${c.paciente_id}`}</td>
-                <td className="px-2 py-1 font-bold">{c.estado}</td>
-                <td className="px-2 py-1 flex gap-2">
-                  {c.estado === 'pendiente' && (
-                    <>
-                      <button onClick={() => actualizarEstado(c.id, 'completada')} className="bg-green-600 text-white px-2 py-1 rounded">Completar</button>
-                      <button onClick={() => actualizarEstado(c.id, 'cancelada')} className="bg-red-600 text-white px-2 py-1 rounded">Cancelar</button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => navigate(`/historia-clinica/${c.paciente_id}`)}
-                    className="bg-blue-600 text-white px-2 py-1 rounded"
-                  >
-                    Historia Clínica
-                  </button>
-                </td>
+        <div className="w-full flex justify-center">
+          <div className="overflow-x-auto w-full" style={{ maxWidth: '100%' }}>
+            <table className="min-w-[400px] text-[11px] sm:text-sm md:text-base border bg-white rounded shadow">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Fecha</th>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Hora</th>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Paciente</th>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Tipo</th>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Estado</th>
+                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {consultas.length === 0 && <tr><td colSpan={6} className="text-center">No hay consultas agendadas</td></tr>}
+              {pagedConsultas.map(c => {
+                let rowColor = '';
+                let etiqueta = '';
+                let alertaUrgente = null;
+                if (c.clasificacion === 'Emergencia') {
+                  rowColor = 'bg-red-200';
+                  etiqueta = <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs ml-2">EMERGENCIA</span>;
+                  alertaUrgente = <span title="Emergencia" className="ml-1 animate-pulse text-red-700 text-lg font-bold">&#9888;</span>;
+                } else if (c.clasificacion === 'Urgente') {
+                  rowColor = 'bg-yellow-200';
+                  etiqueta = <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-xs ml-2">URGENTE</span>;
+                  alertaUrgente = <span title="Urgente" className="ml-1 animate-pulse text-yellow-600 text-lg font-bold">&#9888;</span>;
+                } else if (c.clasificacion === 'No urgente') {
+                  rowColor = 'bg-green-100';
+                  etiqueta = <span className="bg-green-600 text-white px-2 py-0.5 rounded text-xs ml-2">NO URGENTE</span>;
+                }
+                return (
+                  <tr key={c.id} className={rowColor}>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.fecha}</td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.hora}</td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">
+                      {c.paciente_nombre ? `${c.paciente_nombre} ${c.paciente_apellido}` : `Paciente #${c.paciente_id}`}
+                      {etiqueta} {alertaUrgente}
+                    </td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 text-center">
+                      {/* Tipo de consulta/triaje */}
+                      {c.clasificacion ? c.clasificacion : <span className="text-gray-400 italic">Sin clasificar</span>}
+                    </td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 font-bold">{c.estado}</td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 flex flex-wrap gap-0.5 sm:gap-2">
+                      {c.estado === 'pendiente' && (
+                        <>
+                          <button onClick={() => actualizarEstado(c.id, 'completada')} className="bg-green-600 text-white px-1 py-0.5 rounded text-lg md:text-xl" title="Completar">
+                            <span role="img" aria-label="Completar">✔️</span>
+                          </button>
+                          <button onClick={() => actualizarEstado(c.id, 'cancelada')} className="bg-red-600 text-white px-1 py-0.5 rounded text-lg md:text-xl" title="Cancelar">
+                            <span role="img" aria-label="Cancelar">✖️</span>
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => navigate(`/historia-clinica/${c.paciente_id}/${c.id}`)}
+                        className="bg-blue-600 text-white px-1 py-0.5 rounded text-lg md:text-xl"
+                        title="Historia Clínica"
+                      >
+                        <span role="img" aria-label="Historia Clínica">📖</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            </table>
+          </div>
+        </div>
       )}
       {msg && <div className="mt-2 text-center text-sm">{msg}</div>}
+
+      {/* Paginación */}
+      {consultas.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-4">
+          <div className="flex items-center gap-2">
+            <button onClick={handlePrev} disabled={page === 1} className="px-2 py-1 rounded bg-gray-200 disabled:opacity-50">&lt;</button>
+            <span className="text-xs">Página {page} de {totalPages}</span>
+            <button onClick={handleNext} disabled={page === totalPages} className="px-2 py-1 rounded bg-gray-200 disabled:opacity-50">&gt;</button>
+          </div>
+          <div className="flex items-center gap-1 text-xs">
+            <span>Filas por página:</span>
+            <select value={rowsPerPage} onChange={handleRowsPerPage} className="border rounded px-1 py-0.5">
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+            </select>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

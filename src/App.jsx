@@ -11,6 +11,7 @@ import MedicoConsultasPage from "./pages/MedicoConsultasPage";
 import MedicosPage from "./pages/MedicosPage";
 import PanelMedicoPage from "./pages/PanelMedicoPage";
 import HistoriaClinicaPage from "./historia_clinica/HistoriaClinicaPage";
+import EnfermeroPanelPage from "./pages/EnfermeroPanelPage";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
     setUsuario(null);
     sessionStorage.removeItem('usuario');
     sessionStorage.removeItem('medico');
+    window.location.href = '/';
   };
 
   useEffect(() => {
@@ -63,7 +65,12 @@ function App() {
                 <Route path="/mis-consultas" element={<MedicoConsultasPage usuario={usuario} />} />
                 <Route path="/panel-medico" element={<PanelMedicoPage />} />
                 <Route path="/historia-clinica/:pacienteId" element={<HistoriaClinicaPage />} />
+                <Route path="/historia-clinica/:pacienteId/:consultaId" element={<HistoriaClinicaPage />} />
               </>
+            )}
+            {/* Solo visible para enfermeros */}
+            {usuario?.rol === 'enfermero' && (
+              <Route path="/panel-enfermero" element={<EnfermeroPanelPage />} />
             )}
             {/* Solo visible para administradores */}
             {usuario?.rol === 'administrador' && (

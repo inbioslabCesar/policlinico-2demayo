@@ -30,6 +30,11 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
                 <Link to="/mis-consultas" className="py-2 px-3 rounded-lg text-indigo-700 hover:bg-indigo-100 font-medium" onClick={onClose}>Mis Consultas</Link>
                 <Link to="/panel-medico" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Disponibilidad</Link>
               </>
+            ) : usuario?.rol === 'enfermero' ? (
+              <>
+                <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
+                <Link to="/panel-enfermero" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Panel Enfermería</Link>
+              </>
             ) : (
               <>
                 <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
@@ -98,7 +103,7 @@ function DashboardLayout({ usuario, onLogout, children }) {
       <div className="flex flex-1">
         {/* Sidebar for navigation (fijo en PC, drawer en móvil/tablet) */}
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onLogout={onLogout} usuario={usuario} />
-        <main className="flex-1 p-6 md:ml-64">
+  <main className="flex-1 px-2 sm:px-4 md:px-8">
           {children}
         </main>
       </div>

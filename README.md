@@ -353,3 +353,78 @@ Endpoints recomendados:
 GET api_disponibilidad_medicos.php?medico_id=ID → Lista todos los bloques de un médico.
 POST api_disponibilidad_medicos.php → Recibe un array de bloques: [{fecha, hora_inicio, hora_fin}, ...] y los inserta.
 DELETE api_disponibilidad_medicos.php?id=ID → Elimina un bloque específico.
+
+---
+# Integración de escaneo de códigos QR y de barras en el módulo de farmacia
+
+## Objetivo
+Permitir que el sistema de farmacia lea códigos QR o de barras de medicamentos/recetas usando:
+- Lector físico (hardware USB o inalámbrico)
+- Cámara del celular o PC (webcam)
+
+## 1. Lector físico (hardware)
+- Los lectores de código de barras/QR funcionan como un teclado.
+- Solo necesitas un `<input type="text">` en la pantalla donde se debe ingresar el código.
+- El usuario enfoca el input y escanea: el código se escribe automáticamente.
+- Procesa el valor con JavaScript/React para buscar el medicamento, validar receta, etc.
+- No requiere librerías adicionales ni configuración especial.
+
+## 2. Escaneo con cámara (celular o PC)
+Para usar la cámara y escanear códigos directamente desde la web:
+
+### a) Instalar una librería de escaneo
+Ejemplo con [react-qr-reader](https://github.com/JodusNodus/react-qr-reader):
+
+```bash
+npm install react-qr-reader
+```
+
+### b) Ejemplo de uso en React
+```jsx
+import { useState } from "react";
+import QrReader from "react-qr-reader";
+
+function EscanerQR({ onCodigoDetectado }) {
+  const [error, setError] = useState("");
+  return (
+    <div>
+      <QrReader
+        delay={300}
+        onError={err => setError(err?.message || "Error de cámara")}
+        onScan={data => {
+          if (data) onCodigoDetectado(data);
+        }}
+        style={{ width: "100%" }}
+      />
+      {error && <div className="text-red-600">{error}</div>}
+    </div>
+  );
+}
+```
+
+### c) Para códigos de barras
+Puedes usar [quaggaJS](https://serratus.github.io/quaggaJS/) o [react-barcode-reader](https://www.npmjs.com/package/react-barcode-reader):
+
+```bash
+npm install react-barcode-reader
+```
+
+```jsx
+import BarcodeReader from 'react-barcode-reader';
+
+function EscanerBarra({ onCodigoDetectado }) {
+  return <BarcodeReader onError={console.error} onScan={onCodigoDetectado} />;
+}
+```
+
+## Consideraciones
+- El usuario debe aceptar el permiso de cámara en el navegador.
+- El escaneo por cámara es más lento y menos preciso que el hardware dedicado, pero es suficiente para la mayoría de casos.
+- Puedes combinar ambos métodos: input de texto + botón para abrir escáner de cámara.
+- El código detectado se puede usar para buscar automáticamente el medicamento o receta en la base de datos.
+
+## Recomendación
+- Para farmacias con alto volumen, usar hardware dedicado.
+- Para movilidad o bajo volumen, la cámara del celular es suficiente.
+
+---
