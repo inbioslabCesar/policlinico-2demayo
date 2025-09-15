@@ -35,6 +35,11 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
                 <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
                 <Link to="/panel-enfermero" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Panel Enfermería</Link>
               </>
+            ) : usuario?.rol === 'laboratorista' ? (
+              <>
+                <Link to="/panel-laboratorio" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Panel Laboratorio</Link>
+                <Link to="/examenes-laboratorio" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Gestión de Exámenes</Link>
+              </>
             ) : (
               <>
                 <Link to="/" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Dashboard</Link>
