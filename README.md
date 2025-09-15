@@ -428,3 +428,44 @@ function EscanerBarra({ onCodigoDetectado }) {
 - Para movilidad o bajo volumen, la cámara del celular es suficiente.
 
 ---
+
+# Flujo de Solicitud y Resultados de Laboratorio
+
+## 1. Solicitud de análisis de laboratorio desde la Historia Clínica (HC)
+- El médico, desde la HC, puede seleccionar y solicitar pruebas de laboratorio para el paciente (ejemplo: hemograma, glucosa, orina, etc.).
+- Al guardar la solicitud, se crea un registro en la tabla `ordenes_laboratorio`, asociada al `consulta_id` y con el detalle de los exámenes solicitados (en JSON).
+
+**Ejemplo de tabla:**
+```sql
+CREATE TABLE ordenes_laboratorio (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    consulta_id INT NOT NULL,
+    examenes JSON NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(20) DEFAULT 'pendiente',
+    FOREIGN KEY (consulta_id) REFERENCES consultas(id)
+);
+```
+
+## 2. Visualización y gestión en el módulo de laboratorio
+- El personal de laboratorio ve la lista de órdenes pendientes (`estado = 'pendiente'`).
+- Al hacer clic en una orden, puede ingresar los resultados y marcarlos como “completados”.
+- Los resultados se guardan en la tabla `resultados_laboratorio`, vinculados al mismo `consulta_id`.
+
+## 3. Visualización de resultados en la HC
+- El médico y el paciente pueden ver los resultados de laboratorio asociados a la consulta desde la HC.
+
+## 4. Verificación de deuda y servicios asociados (admin/recepción)
+- En la vista de admin/recepción, agregar un botón en la tabla de pacientes para “Verificar deuda/servicios”.
+- Al hacer clic, mostrar un resumen de los servicios asociados al paciente (laboratorio, consulta, tratamiento, rayos X, ecografía, farmacia, etc.) y si tiene deuda pendiente.
+- Esto requiere una consulta a la base de datos para traer los servicios y el estado de pago.
+
+## 5. Siguiente pasos recomendados
+- Crear la tabla `ordenes_laboratorio` y el endpoint PHP para registrar y listar órdenes.
+- Modificar la HC para permitir al médico solicitar exámenes y guardar la orden.
+- Crear la vista de laboratorio para ver y completar órdenes.
+- Agregar el botón de verificación de deuda/servicios en la vista de admin/recepción.
+
+---
+
+**Sigue estos pasos para implementar el flujo completo de laboratorio y servicios asociados.**
