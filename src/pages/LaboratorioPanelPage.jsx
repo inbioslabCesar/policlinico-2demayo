@@ -19,7 +19,7 @@ function LaboratorioPanelPage() {
   const handleSeleccionarOrden = async (orden) => {
     // Si la orden está completada, buscar resultados
     if (orden.estado === 'completado') {
-      const res = await fetch(BASE_URL + `api_get_resultados_laboratorio.php?orden_id=${orden.id}`);
+      const res = await fetch(BASE_URL + `api_get_resultados_laboratorio.php?orden_id=${orden.consulta_id}`);
       const data = await res.json();
       if (data.success && data.resultado) {
         setResultadosOrden(data.resultado.resultados);

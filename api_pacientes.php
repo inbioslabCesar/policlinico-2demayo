@@ -1,22 +1,42 @@
 <?php
 // Siempre enviar headers CORS y Content-Type antes de cualquier salida
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE');
+$allowedOrigins = [
+    'http://localhost:5173',
+    'https://darkcyan-gnu-615778.hostingersite.com'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
 // Capturar errores fatales y enviar JSON con CORS
-set_exception_handler(function($e) {
+set_exception_handler(function($e) use ($origin, $allowedOrigins) {
     http_response_code(500);
-    header('Access-Control-Allow-Origin: *');
+    if (in_array($origin, $allowedOrigins)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    }
+    header('Access-Control-Allow-Credentials: true');
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => 'Error del servidor: ' . $e->getMessage()]);
     exit();
 });
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
+header('Content-Type: application/json');
 require_once __DIR__ . '/config.php';
 
 // Eliminar paciente (DELETE)

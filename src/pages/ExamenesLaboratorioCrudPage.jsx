@@ -58,8 +58,9 @@ export default function ExamenesLaboratorioCrudPage() {
   const [form, setForm] = useState({
     nombre: "",
     metodologia: "",
-    valor_referencial: "",
-    unidades: "",
+    valores_referenciales: [
+      { nombre: "", min: "", max: "", unidad: "" }
+    ],
     precio_publico: "",
     precio_convenio: "",
     tipo_tubo: "",
@@ -88,6 +89,30 @@ export default function ExamenesLaboratorioCrudPage() {
     setForm(f => ({ ...f, [name]: value }));
   };
 
+  // Manejar cambios en los valores referenciales
+  const handleValoresRefChange = (idx, field, value) => {
+    setForm(f => {
+      const nuevos = f.valores_referenciales.map((v, i) =>
+        i === idx ? { ...v, [field]: value } : v
+      );
+      return { ...f, valores_referenciales: nuevos };
+    });
+  };
+
+  const handleAddValorRef = () => {
+    setForm(f => ({
+      ...f,
+      valores_referenciales: [...f.valores_referenciales, { nombre: "", min: "", max: "", unidad: "" }]
+    }));
+  };
+
+  const handleRemoveValorRef = idx => {
+    setForm(f => ({
+      ...f,
+      valores_referenciales: f.valores_referenciales.filter((_, i) => i !== idx)
+    }));
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     setMsg("");
@@ -99,18 +124,34 @@ export default function ExamenesLaboratorioCrudPage() {
       body: JSON.stringify(editId ? { ...form, id: editId } : form)
     });
     const data = await res.json();
-    if (data.success) {
-      setMsg(editId ? "Examen actualizado" : "Examen creado");
-      setForm({ nombre: "", metodologia: "", valor_referencial: "", unidades: "", precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" });
-      setEditId(null);
-      fetchExamenes();
-    } else {
-      setMsg("Error al guardar");
+      if (data.success) {
+        setMsg(editId ? "Examen actualizado" : "Examen creado");
+        setForm({ nombre: "", metodologia: "", valores_referenciales: [{ nombre: "", min: "", max: "", unidad: "" }], precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" });
+        setEditId(null);
+        setModalOpen(false); // Cerrar el modal
+        fetchExamenes();
+      } else {
+        setMsg("Error al guardar");
     }
   };
 
   const handleEdit = ex => {
-    setForm({ ...ex });
+    let valores = [];
+    if (Array.isArray(ex.valores_referenciales)) {
+      valores = ex.valores_referenciales;
+    } else if (typeof ex.valores_referenciales === 'string' && ex.valores_referenciales.trim().length > 0) {
+      try {
+        const parsed = JSON.parse(ex.valores_referenciales);
+        if (Array.isArray(parsed)) valores = parsed;
+      } catch (err) {
+        console.error('Error al parsear valores_referenciales:', err);
+      }
+    }
+    if (!valores.length) valores = [{ nombre: "", min: "", max: "", unidad: "" }];
+    setForm({
+      ...ex,
+      valores_referenciales: valores
+    });
     setEditId(ex.id);
     setMsg("");
     setModalOpen(true);
@@ -120,8 +161,7 @@ export default function ExamenesLaboratorioCrudPage() {
     setForm({
       nombre: "",
       metodologia: "",
-      valor_referencial: "",
-      unidades: "",
+      valores_referenciales: [{ nombre: "", min: "", max: "", unidad: "" }],
       precio_publico: "",
       precio_convenio: "",
       tipo_tubo: "",
@@ -183,8 +223,21 @@ export default function ExamenesLaboratorioCrudPage() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-4 mb-2 md:mb-4 text-xs sm:text-sm">
           <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre del examen" className="border p-1 sm:p-2 rounded" required />
           <input name="metodologia" value={form.metodologia} onChange={handleChange} placeholder="Metodología" className="border p-1 sm:p-2 rounded" />
-          <input name="valor_referencial" value={form.valor_referencial} onChange={handleChange} placeholder="Valor referencial" className="border p-1 sm:p-2 rounded" />
-          <input name="unidades" value={form.unidades} onChange={handleChange} placeholder="Unidades" className="border p-1 sm:p-2 rounded" />
+          <div className="col-span-1 md:col-span-2">
+            <label className="font-semibold">Valores referenciales y unidades:</label>
+            {(Array.isArray(form.valores_referenciales) ? form.valores_referenciales : []).map((v, idx) => (
+              <div key={idx} className="flex gap-1 mb-1 items-center">
+                <input type="text" value={v.nombre} onChange={e => handleValoresRefChange(idx, 'nombre', e.target.value)} placeholder="Nombre" className="border p-1 rounded w-32" />
+                <input type="text" value={v.min} onChange={e => handleValoresRefChange(idx, 'min', e.target.value)} placeholder="Mín" className="border p-1 rounded w-16" />
+                <input type="text" value={v.max} onChange={e => handleValoresRefChange(idx, 'max', e.target.value)} placeholder="Máx" className="border p-1 rounded w-16" />
+                <input type="text" value={v.unidad} onChange={e => handleValoresRefChange(idx, 'unidad', e.target.value)} placeholder="Unidad" className="border p-1 rounded w-20" />
+                <button type="button" className="bg-red-500 text-white px-2 rounded" onClick={() => handleRemoveValorRef(idx)} disabled={form.valores_referenciales.length === 1}>-</button>
+                {idx === form.valores_referenciales.length - 1 && (
+                  <button type="button" className="bg-green-500 text-white px-2 rounded" onClick={handleAddValorRef}>+</button>
+                )}
+              </div>
+            ))}
+          </div>
           <input name="precio_publico" value={form.precio_publico} onChange={handleChange} placeholder="Precio público" className="border p-1 sm:p-2 rounded" type="number" min="0" />
           <input name="precio_convenio" value={form.precio_convenio} onChange={handleChange} placeholder="Precio convenio" className="border p-1 sm:p-2 rounded" type="number" min="0" />
           <input name="tipo_tubo" value={form.tipo_tubo} onChange={handleChange} placeholder="Tipo de tubo" className="border p-1 sm:p-2 rounded" />
@@ -194,7 +247,7 @@ export default function ExamenesLaboratorioCrudPage() {
           <input name="preanalitica" value={form.preanalitica} onChange={handleChange} placeholder="Preanalítica" className="border p-1 sm:p-2 rounded" />
           <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row gap-1 md:gap-2 mt-1">
             <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full md:w-auto">{editId ? "Actualizar" : "Crear"}</button>
-            <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded w-full md:w-auto" onClick={() => { setEditId(null); setForm({ nombre: "", metodologia: "", valor_referencial: "", unidades: "", precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" }); setModalOpen(false); }}>Cancelar</button>
+            <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded w-full md:w-auto" onClick={() => { setEditId(null); setForm({ nombre: "", metodologia: "", valores_referenciales: [{ nombre: "", min: "", max: "", unidad: "" }], precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" }); setModalOpen(false); }}>Cancelar</button>
           </div>
         </form>
       </Modal>
@@ -219,8 +272,6 @@ export default function ExamenesLaboratorioCrudPage() {
             <tr className="bg-gray-200 text-[9px] sm:text-xs md:text-sm">
               <th className="p-2">Nombre</th>
               <th className="p-2">Metodología</th>
-              <th className="p-2">Valor Ref.</th>
-              <th className="p-2">Unidades</th>
               <th className="p-2">Tubo</th>
               <th className="p-2">Frasco</th>
               <th className="p-2">Tiempo</th>
@@ -241,8 +292,7 @@ export default function ExamenesLaboratorioCrudPage() {
                 <tr key={ex.id} className="border-b hover:bg-gray-50 text-[9px] sm:text-xs md:text-sm">
                   <td className="p-2">{ex.nombre}</td>
                   <td className="p-2">{ex.metodologia}</td>
-                  <td className="p-2">{ex.valor_referencial}</td>
-                  <td className="p-2">{ex.unidades}</td>
+              {/* Columna de valores referenciales eliminada para ahorrar espacio visual */}
                   <td className="p-2">{ex.tipo_tubo}</td>
                   <td className="p-2">{ex.tipo_frasco}</td>
                   <td className="p-2">{ex.tiempo_resultado}</td>

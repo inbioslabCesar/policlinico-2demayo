@@ -1,9 +1,18 @@
 <?php
 // Permitir CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
+// CORS para localhost y producción
+$allowedOrigins = [
+    'http://localhost:5173',
+    'https://darkcyan-gnu-615778.hostingersite.com'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Content-Type: application/json; charset=UTF-8');
 
 require_once "config.php";
 
@@ -21,6 +30,12 @@ switch ($method) {
         $result = $conn->query($sql);
         $examenes = [];
         while ($row = $result->fetch_assoc()) {
+            // Decodificar el campo JSON si existe
+            if (isset($row['valores_referenciales']) && $row['valores_referenciales']) {
+                $row['valores_referenciales'] = json_decode($row['valores_referenciales'], true);
+            } else {
+                $row['valores_referenciales'] = [];
+            }
             $examenes[] = $row;
         }
         echo json_encode(["success" => true, "examenes" => $examenes]);
@@ -30,8 +45,7 @@ switch ($method) {
         $data = json_decode(file_get_contents('php://input'), true);
         $nombre = $data['nombre'] ?? null;
         $metodologia = $data['metodologia'] ?? null;
-        $valor_referencial = $data['valor_referencial'] ?? null;
-        $unidades = $data['unidades'] ?? null;
+        $valores_referenciales = isset($data['valores_referenciales']) ? json_encode($data['valores_referenciales']) : null;
         $precio_publico = $data['precio_publico'] !== "" ? $data['precio_publico'] : null;
         $precio_convenio = $data['precio_convenio'] !== "" ? $data['precio_convenio'] : null;
         $tipo_tubo = $data['tipo_tubo'] ?? null;
@@ -39,13 +53,12 @@ switch ($method) {
         $tiempo_resultado = $data['tiempo_resultado'] ?? null;
         $condicion_paciente = $data['condicion_paciente'] ?? null;
         $preanalitica = $data['preanalitica'] ?? null;
-        $stmt = $conn->prepare("INSERT INTO examenes_laboratorio (nombre, metodologia, valor_referencial, unidades, precio_publico, precio_convenio, tipo_tubo, tipo_frasco, tiempo_resultado, condicion_paciente, preanalitica, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
+        $stmt = $conn->prepare("INSERT INTO examenes_laboratorio (nombre, metodologia, valores_referenciales, precio_publico, precio_convenio, tipo_tubo, tipo_frasco, tiempo_resultado, condicion_paciente, preanalitica, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
         $stmt->bind_param(
-            "ssssddsssss",
+            "sssddsssss",
             $nombre,
             $metodologia,
-            $valor_referencial,
-            $unidades,
+            $valores_referenciales,
             $precio_publico,
             $precio_convenio,
             $tipo_tubo,
@@ -62,8 +75,7 @@ switch ($method) {
         $data = json_decode(file_get_contents('php://input'), true);
         $nombre = $data['nombre'] ?? null;
         $metodologia = $data['metodologia'] ?? null;
-        $valor_referencial = $data['valor_referencial'] ?? null;
-        $unidades = $data['unidades'] ?? null;
+        $valores_referenciales = isset($data['valores_referenciales']) ? json_encode($data['valores_referenciales']) : null;
         $precio_publico = $data['precio_publico'] !== "" ? $data['precio_publico'] : null;
         $precio_convenio = $data['precio_convenio'] !== "" ? $data['precio_convenio'] : null;
         $tipo_tubo = $data['tipo_tubo'] ?? null;
@@ -72,13 +84,12 @@ switch ($method) {
         $condicion_paciente = $data['condicion_paciente'] ?? null;
         $preanalitica = $data['preanalitica'] ?? null;
         $id = $data['id'];
-        $stmt = $conn->prepare("UPDATE examenes_laboratorio SET nombre=?, metodologia=?, valor_referencial=?, unidades=?, precio_publico=?, precio_convenio=?, tipo_tubo=?, tipo_frasco=?, tiempo_resultado=?, condicion_paciente=?, preanalitica=? WHERE id=?");
+        $stmt = $conn->prepare("UPDATE examenes_laboratorio SET nombre=?, metodologia=?, valores_referenciales=?, precio_publico=?, precio_convenio=?, tipo_tubo=?, tipo_frasco=?, tiempo_resultado=?, condicion_paciente=?, preanalitica=? WHERE id=?");
         $stmt->bind_param(
-            "ssssddsssssi",
+            "sssddsssssi",
             $nombre,
             $metodologia,
-            $valor_referencial,
-            $unidades,
+            $valores_referenciales,
             $precio_publico,
             $precio_convenio,
             $tipo_tubo,

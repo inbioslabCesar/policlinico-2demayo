@@ -75,7 +75,7 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/agendar-consulta" element={
-              <ProtectedRoute usuario={usuario} rolesPermitidos={["recepcionista","enfermero"]}>
+              <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
                 <AgendarConsultaPage />
               </ProtectedRoute>
             } />
