@@ -1,4 +1,5 @@
 import LaboratorioPanelPage from "./pages/LaboratorioPanelPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -59,34 +60,84 @@ function App() {
                 ? <Navigate to="/mis-consultas" replace />
                 : usuario?.rol === 'laboratorista'
                   ? <Navigate to="/panel-laboratorio" replace />
-                  : <Dashboard usuario={usuario} />
+                  : usuario?.rol === 'enfermero'
+                    ? <Navigate to="/panel-enfermero" replace />
+                    : <Dashboard usuario={usuario} />
             } />
-            <Route path="/pacientes" element={<PacientesPage />} />
-            <Route path="/usuarios" element={<UsuariosPage />} />
-            <Route path="/agendar-consulta" element={<AgendarConsultaPage />} />
+            <Route path="/pacientes" element={
+              <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
+                <PacientesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/usuarios" element={
+              <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador"]}>
+                <UsuariosPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/agendar-consulta" element={
+              <ProtectedRoute usuario={usuario} rolesPermitidos={["recepcionista","enfermero"]}>
+                <AgendarConsultaPage />
+              </ProtectedRoute>
+            } />
             {/* Solo visible para médicos */}
             {usuario?.rol === 'medico' && (
               <>
-                <Route path="/mis-consultas" element={<MedicoConsultasPage usuario={usuario} />} />
-                <Route path="/panel-medico" element={<PanelMedicoPage />} />
-                <Route path="/historia-clinica/:pacienteId" element={<HistoriaClinicaPage />} />
-                <Route path="/historia-clinica/:pacienteId/:consultaId" element={<HistoriaClinicaPage />} />
-                <Route path="/solicitud-laboratorio/:consultaId" element={<SolicitudLaboratorioPage />} />
+                <Route path="/mis-consultas" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <MedicoConsultasPage usuario={usuario} />
+                  </ProtectedRoute>
+                } />
+                <Route path="/panel-medico" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <PanelMedicoPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/historia-clinica/:pacienteId" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <HistoriaClinicaPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/historia-clinica/:pacienteId/:consultaId" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <HistoriaClinicaPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/solicitud-laboratorio/:consultaId" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <SolicitudLaboratorioPage />
+                  </ProtectedRoute>
+                } />
               </>
             )}
             {/* Solo visible para enfermeros */}
             {usuario?.rol === 'enfermero' && (
-              <Route path="/panel-enfermero" element={<EnfermeroPanelPage />} />
+              <Route path="/panel-enfermero" element={
+                <ProtectedRoute usuario={usuario} rolesPermitidos={["enfermero"]}>
+                  <EnfermeroPanelPage />
+                </ProtectedRoute>
+              } />
             )}
             {/* Solo visible para administradores */}
             {usuario?.rol === 'administrador' && (
-              <Route path="/medicos" element={<MedicosPage />} />
+              <Route path="/medicos" element={
+                <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador"]}>
+                  <MedicosPage />
+                </ProtectedRoute>
+              } />
             )}
             {/* Solo visible para laboratoristas */}
             {usuario?.rol === 'laboratorista' && (
               <>
-                <Route path="/panel-laboratorio" element={<LaboratorioPanelPage />} />
-                <Route path="/examenes-laboratorio" element={<ExamenesLaboratorioCrudPage />} />
+                <Route path="/panel-laboratorio" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["laboratorista"]}>
+                    <LaboratorioPanelPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/examenes-laboratorio" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["laboratorista"]}>
+                    <ExamenesLaboratorioCrudPage />
+                  </ProtectedRoute>
+                } />
               </>
             )}
             {/* Puedes agregar más rutas aquí */}

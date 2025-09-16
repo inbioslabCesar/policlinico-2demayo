@@ -1,4 +1,8 @@
 <?php
+// Mostrar errores para depuración
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // api_ordenes_laboratorio.php: Gestiona las órdenes de laboratorio
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
@@ -33,7 +37,7 @@ switch ($method) {
         // Listar órdenes de laboratorio (por estado o consulta_id)
         $estado = $_GET['estado'] ?? null;
         $consulta_id = isset($_GET['consulta_id']) ? intval($_GET['consulta_id']) : null;
-        $sql = 'SELECT * FROM ordenes_laboratorio WHERE 1=1';
+    $sql = 'SELECT o.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido, m.nombre AS medico_nombre FROM ordenes_laboratorio o LEFT JOIN consultas c ON o.consulta_id = c.id LEFT JOIN pacientes p ON c.paciente_id = p.id LEFT JOIN medicos m ON c.medico_id = m.id WHERE 1=1';
         $params = [];
         $types = '';
         if ($estado) {

@@ -469,3 +469,5 @@ CREATE TABLE ordenes_laboratorio (
 ---
 
 **Sigue estos pasos para implementar el flujo completo de laboratorio y servicios asociados.**
+
+por ejemplo a hora estoy con rol admin voy precionando la flecha hacia atras de la barra de navegacion y por ejemplo entro a esta vista que no le correcponde a admin http://localhost:5173/historia-clinica/16/23, que es la del medico pero no se visualiza nada, pero la idea es que el rol que se esta logeado en ese instante no pueda acceder a otras rutas auque no visualice nada, no es sierto ? como solucionaria este tema ?
