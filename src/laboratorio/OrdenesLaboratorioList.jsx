@@ -33,7 +33,6 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
 
   if (loading || examenesDisponibles.length === 0) return <div className="p-4">Cargando órdenes de laboratorio...</div>;
   if (error) return <div className="p-4 text-red-600">{error}</div>;
-  if (ordenes.length === 0) return <div className="p-4">No hay órdenes registradas.</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white rounded shadow mt-6">
@@ -52,36 +51,40 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
           </tr>
         </thead>
         <tbody>
-          {ordenes.map(orden => (
-            <tr key={orden.id} className="border-b">
-              <td className="p-2">{orden.id}</td>
-              <td className="p-2">{orden.paciente_nombre} {orden.paciente_apellido}</td>
-              <td className="p-2">{orden.medico_nombre}</td>
-              <td className="p-2">{orden.consulta_id}</td>
-              <td className="p-2">
-                {orden.examenes && Array.isArray(orden.examenes)
-                  ? orden.examenes.map(ex => {
-                      const exObj = examenesDisponibles.find(e => e.id == ex);
-                      if (exObj) return exObj.nombre;
-                      // Si no se encuentra, mostrar 'Desconocido'
-                      // Si ex es string, mostrarlo, si es número, mostrar 'Desconocido'
-                      return typeof ex === 'string' && isNaN(Number(ex)) ? ex : 'Desconocido';
-                    }).join(", ")
-                  : ""}
-              </td>
-              <td className="p-2">{orden.fecha?.slice(0,16).replace("T"," ")}</td>
-              <td className="p-2">
-                <span className={orden.estado === 'completado' ? 'text-green-600 font-semibold' : 'text-yellow-700 font-semibold'}>
-                  {orden.estado === 'completado' ? 'Completado' : 'Pendiente'}
-                </span>
-              </td>
-              <td className="p-2">
-                <button onClick={() => onSeleccionarOrden(orden)} className="bg-green-600 text-white px-3 py-1 rounded" title={orden.estado === 'completado' ? 'Editar resultado' : 'Llenar resultados'}>
-                  {orden.estado === 'completado' ? '✏️' : '📝'}
-                </button>
-              </td>
+          {ordenes.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="p-4 text-center text-gray-500">No hay órdenes registradas.</td>
             </tr>
-          ))}
+          ) : (
+            ordenes.map(orden => (
+              <tr key={orden.id} className="border-b">
+                <td className="p-2">{orden.id}</td>
+                <td className="p-2">{orden.paciente_nombre} {orden.paciente_apellido}</td>
+                <td className="p-2">{orden.medico_nombre}</td>
+                <td className="p-2">{orden.consulta_id}</td>
+                <td className="p-2">
+                  {orden.examenes && Array.isArray(orden.examenes)
+                    ? orden.examenes.map(ex => {
+                        const exObj = examenesDisponibles.find(e => e.id == ex);
+                        if (exObj) return exObj.nombre;
+                        return typeof ex === 'string' && isNaN(Number(ex)) ? ex : 'Desconocido';
+                      }).join(", ")
+                    : ""}
+                </td>
+                <td className="p-2">{orden.fecha?.slice(0,16).replace("T"," ")}</td>
+                <td className="p-2">
+                  <span className={orden.estado === 'completado' ? 'text-green-600 font-semibold' : 'text-yellow-700 font-semibold'}>
+                    {orden.estado === 'completado' ? 'Completado' : 'Pendiente'}
+                  </span>
+                </td>
+                <td className="p-2">
+                  <button onClick={() => onSeleccionarOrden(orden)} className="bg-green-600 text-white px-3 py-1 rounded" title={orden.estado === 'completado' ? 'Editar resultado' : 'Llenar resultados'}>
+                    {orden.estado === 'completado' ? '✏️' : '📝'}
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

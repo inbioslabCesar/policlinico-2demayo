@@ -1,4 +1,14 @@
+
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
 // CORS para localhost y producción
 $allowedOrigins = [
     'http://localhost:5173',
@@ -15,15 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'None',
-]);
-session_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/config.php';
 

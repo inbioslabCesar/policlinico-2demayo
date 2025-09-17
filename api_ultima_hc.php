@@ -1,4 +1,14 @@
+
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
 // api_ultima_hc.php: Devuelve el último código de historia clínica registrado
 // CORS para localhost y producción
 $allowedOrigins = [
@@ -16,15 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   http_response_code(200);
   exit();
 }
-session_set_cookie_params([
-  'lifetime' => 0,
-  'path' => '/',
-  'domain' => '',
-  'secure' => true,
-  'httponly' => true,
-  'samesite' => 'None',
-]);
-session_start();
 require_once __DIR__ . '/config.php';
 header('Content-Type: application/json');
 $res = $conn->query("SELECT historia_clinica FROM pacientes ORDER BY id DESC LIMIT 1");

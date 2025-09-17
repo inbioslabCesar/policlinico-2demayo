@@ -1,4 +1,14 @@
+
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
 // Mostrar errores para depuración
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

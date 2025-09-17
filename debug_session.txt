@@ -1,0 +1,9 @@
+Array
+(
+    [session] => Array
+        (
+            [test] => ok
+        )
+
+    [rol] => 
+)

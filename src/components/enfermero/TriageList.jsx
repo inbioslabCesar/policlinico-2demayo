@@ -58,7 +58,6 @@ function TriageList() {
 
   if (loading) return <div>Cargando pacientes en triaje...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
-  if (consultas.length === 0) return <div>No hay pacientes pendientes de triaje.</div>;
 
   return (
     <div>
@@ -102,39 +101,45 @@ function TriageList() {
             </tr>
           </thead>
           <tbody>
-            {consultas.map((c) => (
-              <tr key={c.id}>
-                <td className="p-2">{c.historia_clinica || '-'}</td>
-                <td className="p-2">{c.paciente_nombre} {c.paciente_apellido}</td>
-                <td className="p-2">{c.medico_nombre || '-'}</td>
-                <td className="p-2">{c.fecha}</td>
-                <td className="p-2">{c.hora}</td>
-                <td className="p-2">
-                  <button
-                    className="bg-blue-600 text-white px-2 py-1 rounded"
-                    onClick={async () => {
-                      setTriajeActual(c);
-                      setCargandoTriaje(true);
-                      setTriajeData(null);
-                      try {
-                        const res = await fetch(BASE_URL + `api_triaje.php?consulta_id=${c.id}`);
-                        const data = await res.json();
-                        if (data.success && data.triaje && data.triaje.datos) {
-                          setTriajeData(data.triaje.datos);
-                        } else {
+            {consultas.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="p-4 text-center text-gray-500">No hay pacientes pendientes de triaje.</td>
+              </tr>
+            ) : (
+              consultas.map((c) => (
+                <tr key={c.id}>
+                  <td className="p-2">{c.historia_clinica || '-'}</td>
+                  <td className="p-2">{c.paciente_nombre} {c.paciente_apellido}</td>
+                  <td className="p-2">{c.medico_nombre || '-'}</td>
+                  <td className="p-2">{c.fecha}</td>
+                  <td className="p-2">{c.hora}</td>
+                  <td className="p-2">
+                    <button
+                      className="bg-blue-600 text-white px-2 py-1 rounded"
+                      onClick={async () => {
+                        setTriajeActual(c);
+                        setCargandoTriaje(true);
+                        setTriajeData(null);
+                        try {
+                          const res = await fetch(BASE_URL + `api_triaje.php?consulta_id=${c.id}`);
+                          const data = await res.json();
+                          if (data.success && data.triaje && data.triaje.datos) {
+                            setTriajeData(data.triaje.datos);
+                          } else {
+                            setTriajeData(null);
+                          }
+                        } catch {
                           setTriajeData(null);
                         }
-                      } catch {
-                        setTriajeData(null);
-                      }
-                      setCargandoTriaje(false);
-                    }}
-                  >
-                    Realizar triaje
-                  </button>
-                </td>
-              </tr>
-            ))}
+                        setCargandoTriaje(false);
+                      }}
+                    >
+                      Realizar triaje
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       )}

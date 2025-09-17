@@ -1,4 +1,14 @@
+
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
 // CORS para localhost y producción
 $allowedOrigins = [
     'http://localhost:5173',

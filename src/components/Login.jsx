@@ -17,7 +17,8 @@ function Login({ onLogin }) {
       let res = await fetch(BASE_URL + "api_login.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password })
+        body: JSON.stringify({ usuario, password }),
+        credentials: "include"
       });
       let data = await res.json();
       if (res.ok && data.success) {
@@ -30,7 +31,8 @@ function Login({ onLogin }) {
       res = await fetch(BASE_URL + "api_login_medico.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: usuario, password })
+        body: JSON.stringify({ email: usuario, password }),
+        credentials: "include"
       });
       data = await res.json();
       if (res.ok && data.success) {

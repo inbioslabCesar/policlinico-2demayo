@@ -1,4 +1,12 @@
+
 <?php
+session_set_cookie_params([
+    'samesite' => 'None',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+    'httponly' => true,
+    'path' => '/',
+]);
+session_start();
 
 // Permitir origen local y producción
 $allowedOrigins = [
@@ -19,15 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-
-// Iniciar sesión y forzar atributos de cookie para cross-origin seguro
-session_set_cookie_params([
-    'samesite' => 'None',
-    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-    'httponly' => true,
-    'path' => '/',
-]);
-session_start();
 
 // Conexión a la base de datos centralizada
 require_once __DIR__ . '/config.php';

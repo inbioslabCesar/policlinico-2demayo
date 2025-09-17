@@ -1,4 +1,13 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
 // Siempre enviar headers CORS y Content-Type antes de cualquier salida
 $allowedOrigins = [
     'http://localhost:5173',
@@ -27,15 +36,6 @@ set_exception_handler(function($e) use ($origin, $allowedOrigins) {
     echo json_encode(['success' => false, 'error' => 'Error del servidor: ' . $e->getMessage()]);
     exit();
 });
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'None',
-]);
-session_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/config.php';
 

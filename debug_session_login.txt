@@ -1,0 +1,12 @@
+Array
+(
+    [prueba] => ok
+    [usuario] => Array
+        (
+            [id] => 1
+            [usuario] => admin
+            [nombre] => Administrador General
+            [rol] => administrador
+        )
+
+)

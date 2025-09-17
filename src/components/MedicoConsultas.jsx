@@ -55,49 +55,49 @@ function MedicoConsultas({ medicoId }) {
   const handleNext = () => setPage((p) => Math.min(totalPages, p + 1));
 
   return (
-    <div className="max-w-3xl mx-auto p-2 sm:p-4">
+    <div className="flex flex-col items-center w-full p-2 sm:p-4">
       <h2 className="text-xl font-bold mb-4 text-center">Mis Consultas Agendadas</h2>
       {loading ? <div>Cargando...</div> : (
         <div className="w-full flex justify-center">
-          <div className="overflow-x-auto w-full" style={{ maxWidth: '100%' }}>
-            <table className="min-w-[400px] text-[11px] sm:text-sm md:text-base border bg-white rounded shadow">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Fecha</th>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Hora</th>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Paciente</th>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Tipo</th>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Estado</th>
-                <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {consultas.length === 0 && <tr><td colSpan={6} className="text-center">No hay consultas agendadas</td></tr>}
-              {pagedConsultas.map(c => {
-                let rowColor = '';
-                let etiqueta = '';
-                let alertaUrgente = null;
-                if (c.clasificacion === 'Emergencia') {
-                  rowColor = 'bg-red-200';
-                  etiqueta = <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs ml-2">EMERGENCIA</span>;
-                  alertaUrgente = <span title="Emergencia" className="ml-1 animate-pulse text-red-700 text-lg font-bold">&#9888;</span>;
-                } else if (c.clasificacion === 'Urgente') {
-                  rowColor = 'bg-yellow-200';
-                  etiqueta = <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-xs ml-2">URGENTE</span>;
-                  alertaUrgente = <span title="Urgente" className="ml-1 animate-pulse text-yellow-600 text-lg font-bold">&#9888;</span>;
-                } else if (c.clasificacion === 'No urgente') {
-                  rowColor = 'bg-green-100';
-                  etiqueta = <span className="bg-green-600 text-white px-2 py-0.5 rounded text-xs ml-2">NO URGENTE</span>;
-                }
-                return (
-                  <tr key={c.id} className={rowColor}>
-                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.fecha}</td>
-                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.hora}</td>
-                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">
-                      {c.paciente_nombre ? `${c.paciente_nombre} ${c.paciente_apellido}` : `Paciente #${c.paciente_id}`}
-                      {etiqueta} {alertaUrgente}
-                    </td>
-                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 text-center">
+          <div className="overflow-x-auto w-full max-w-xl">
+            <table className="min-w-[400px] w-full text-[11px] sm:text-sm md:text-base border bg-white rounded shadow mx-auto">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Fecha</th>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Hora</th>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Paciente</th>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Tipo</th>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Estado</th>
+                  <th className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 whitespace-nowrap">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {consultas.length === 0 && <tr><td colSpan={6} className="text-center">No hay consultas agendadas</td></tr>}
+                {pagedConsultas.map(c => {
+                  let rowColor = '';
+                  let etiqueta = '';
+                  let alertaUrgente = null;
+                  if (c.clasificacion === 'Emergencia') {
+                    rowColor = 'bg-red-200';
+                    etiqueta = <span className="bg-red-600 text-white px-2 py-0.5 rounded text-xs ml-2">EMERGENCIA</span>;
+                    alertaUrgente = <span title="Emergencia" className="ml-1 animate-pulse text-red-700 text-lg font-bold">&#9888;</span>;
+                  } else if (c.clasificacion === 'Urgente') {
+                    rowColor = 'bg-yellow-200';
+                    etiqueta = <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-xs ml-2">URGENTE</span>;
+                    alertaUrgente = <span title="Urgente" className="ml-1 animate-pulse text-yellow-600 text-lg font-bold">&#9888;</span>;
+                  } else if (c.clasificacion === 'No urgente') {
+                    rowColor = 'bg-green-100';
+                    etiqueta = <span className="bg-green-600 text-white px-2 py-0.5 rounded text-xs ml-2">NO URGENTE</span>;
+                  }
+                  return (
+                    <tr key={c.id} className={rowColor}>
+                      <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.fecha}</td>
+                      <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.hora}</td>
+                      <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">
+                        {c.paciente_nombre ? `${c.paciente_nombre} ${c.paciente_apellido}` : `Paciente #${c.paciente_id}`}
+                        {etiqueta} {alertaUrgente}
+                      </td>
+                      <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 text-center">
                       {/* Tipo de consulta/triaje */}
                       {c.clasificacion ? c.clasificacion : <span className="text-gray-400 italic">Sin clasificar</span>}
                     </td>
