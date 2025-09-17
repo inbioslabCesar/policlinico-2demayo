@@ -67,7 +67,9 @@ export default function ExamenesLaboratorioCrudPage() {
     tipo_frasco: "",
     tiempo_resultado: "",
     condicion_paciente: "",
-    preanalitica: ""
+    preanalitica: "",
+    titulo: "",
+    es_subtitulo: false
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -85,8 +87,8 @@ export default function ExamenesLaboratorioCrudPage() {
   useEffect(() => { fetchExamenes(); }, []);
 
   const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
   // Manejar cambios en los valores referenciales
@@ -150,7 +152,9 @@ export default function ExamenesLaboratorioCrudPage() {
     if (!valores.length) valores = [{ nombre: "", min: "", max: "", unidad: "" }];
     setForm({
       ...ex,
-      valores_referenciales: valores
+      valores_referenciales: valores,
+      titulo: ex.titulo || "",
+      es_subtitulo: ex.es_subtitulo || false
     });
     setEditId(ex.id);
     setMsg("");
@@ -168,7 +172,9 @@ export default function ExamenesLaboratorioCrudPage() {
       tipo_frasco: "",
       tiempo_resultado: "",
       condicion_paciente: "",
-      preanalitica: ""
+      preanalitica: "",
+      titulo: "",
+      es_subtitulo: false
     });
     setEditId(null);
     setMsg("");
@@ -222,7 +228,7 @@ export default function ExamenesLaboratorioCrudPage() {
         <h3 className="text-lg font-bold mb-2 text-center">{editId ? "Editar examen" : "Nuevo examen"}</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-4 mb-2 md:mb-4 text-xs sm:text-sm">
           <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre del examen" className="border p-1 sm:p-2 rounded" required />
-          <input name="metodologia" value={form.metodologia} onChange={handleChange} placeholder="Metodología" className="border p-1 sm:p-2 rounded" />
+          <input name="metodologia" value={form.metodologia} onChange={handleChange} placeholder="Metodología" className="border p-1 sm:p-2 rounded" />      
           <div className="col-span-1 md:col-span-2">
             <label className="font-semibold">Valores referenciales y unidades:</label>
             {(Array.isArray(form.valores_referenciales) ? form.valores_referenciales : []).map((v, idx) => (
@@ -290,7 +296,14 @@ export default function ExamenesLaboratorioCrudPage() {
             ) : (
               paginated.map(ex => (
                 <tr key={ex.id} className="border-b hover:bg-gray-50 text-[9px] sm:text-xs md:text-sm">
-                  <td className="p-2">{ex.nombre}</td>
+                  <td className="p-2">
+                    {ex.titulo && (
+                      <span className={ex.es_subtitulo ? "font-bold" : "font-semibold text-gray-700"}>{ex.titulo}</span>
+                    )}
+                    {ex.nombre && (
+                      <div>{ex.nombre}</div>
+                    )}
+                  </td>
                   <td className="p-2">{ex.metodologia}</td>
               {/* Columna de valores referenciales eliminada para ahorrar espacio visual */}
                   <td className="p-2">{ex.tipo_tubo}</td>
