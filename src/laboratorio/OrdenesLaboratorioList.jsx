@@ -37,56 +37,52 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white rounded shadow mt-6">
       <h2 className="text-xl font-bold mb-4 text-center">Órdenes de Laboratorio</h2>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-blue-100">
-            <th className="p-2">ID Orden</th>
-            <th className="p-2">Paciente</th>
-            <th className="p-2">Médico</th>
-            <th className="p-2">Consulta</th>
-            <th className="p-2">Exámenes Solicitados</th>
-            <th className="p-2">Fecha</th>
-            <th className="p-2">Estado</th>
-            <th className="p-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ordenes.length === 0 ? (
-            <tr>
-              <td colSpan={8} className="p-4 text-center text-gray-500">No hay órdenes registradas.</td>
+      <div className="overflow-x-auto">
+        <table className="min-w-[400px] w-full text-sm">
+          <thead>
+            <tr className="bg-blue-100">
+              <th className="p-2 whitespace-nowrap">ID Orden</th>
+              <th className="p-2 whitespace-nowrap">Paciente</th>
+              <th className="p-2 whitespace-nowrap hidden sm:table-cell">Médico</th>
+              <th className="p-2 whitespace-nowrap hidden md:table-cell">Consulta</th>
+              <th className="p-2 whitespace-nowrap hidden md:table-cell">Fecha</th>
+              <th className="p-2 whitespace-nowrap">Estado</th>
+              <th className="p-2 whitespace-nowrap">Acciones</th>
             </tr>
-          ) : (
-            ordenes.map(orden => (
-              <tr key={orden.id} className="border-b">
-                <td className="p-2">{orden.id}</td>
-                <td className="p-2">{orden.paciente_nombre} {orden.paciente_apellido}</td>
-                <td className="p-2">{orden.medico_nombre}</td>
-                <td className="p-2">{orden.consulta_id}</td>
-                <td className="p-2">
-                  {orden.examenes && Array.isArray(orden.examenes)
-                    ? orden.examenes.map(ex => {
-                        const exObj = examenesDisponibles.find(e => e.id == ex);
-                        if (exObj) return exObj.nombre;
-                        return typeof ex === 'string' && isNaN(Number(ex)) ? ex : 'Desconocido';
-                      }).join(", ")
-                    : ""}
-                </td>
-                <td className="p-2">{orden.fecha?.slice(0,16).replace("T"," ")}</td>
-                <td className="p-2">
-                  <span className={orden.estado === 'completado' ? 'text-green-600 font-semibold' : 'text-yellow-700 font-semibold'}>
-                    {orden.estado === 'completado' ? 'Completado' : 'Pendiente'}
-                  </span>
-                </td>
-                <td className="p-2">
-                  <button onClick={() => onSeleccionarOrden(orden)} className="bg-green-600 text-white px-3 py-1 rounded" title={orden.estado === 'completado' ? 'Editar resultado' : 'Llenar resultados'}>
-                    {orden.estado === 'completado' ? '✏️' : '📝'}
-                  </button>
-                </td>
+          </thead>
+          <tbody>
+            {ordenes.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="p-4 text-center text-gray-500">No hay órdenes registradas.</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              ordenes.map(orden => (
+                <tr key={orden.id} className="border-b">
+                  <td className="p-2 whitespace-nowrap">{orden.id}</td>
+                  <td className="p-2 whitespace-nowrap">{orden.paciente_nombre} {orden.paciente_apellido}</td>
+                  <td className="p-2 whitespace-nowrap hidden sm:table-cell">{orden.medico_nombre}</td>
+                  <td className="p-2 whitespace-nowrap hidden md:table-cell">{orden.consulta_id}</td>
+                  <td className="p-2 whitespace-nowrap hidden md:table-cell">{orden.fecha?.slice(0,16).replace("T"," ")}</td>
+                  <td className="p-2 whitespace-nowrap">
+                    <span className={orden.estado === 'completado' ? 'text-green-600 font-semibold' : 'text-yellow-700 font-semibold'}>
+                      {orden.estado === 'completado' ? 'Completado' : 'Pendiente'}
+                    </span>
+                  </td>
+                  <td className="p-2 whitespace-nowrap">
+                    <button
+                      onClick={() => onSeleccionarOrden(orden)}
+                      className="bg-green-600 text-white px-3 py-1 rounded text-base md:text-sm min-w-[40px]"
+                      title={orden.estado === 'completado' ? 'Editar resultado' : 'Llenar resultados'}
+                    >
+                      {orden.estado === 'completado' ? '✏️' : '📝'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
