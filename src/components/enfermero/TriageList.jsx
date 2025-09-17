@@ -5,6 +5,7 @@ import TriageForm from "./TriageForm";
 
 function TriageList() {
   const [consultas, setConsultas] = useState([]);
+  const [triajeStatus, setTriajeStatus] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [triajeActual, setTriajeActual] = useState(null);
@@ -38,13 +39,24 @@ function TriageList() {
     setLoading(true);
     fetch(BASE_URL + "api_consultas.php")
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.success) {
-          // Filtrar solo consultas pendientes de triaje (estado 'pendiente' y sin campo triaje)
           const pendientes = data.consultas.filter(
             (c) => c.estado === "pendiente" && (!c.triaje_realizado || c.triaje_realizado === "0")
           );
           setConsultas(pendientes);
+          // Consultar estado de triaje para cada consulta
+          const statusObj = {};
+          await Promise.all(pendientes.map(async (c) => {
+            try {
+              const res = await fetch(BASE_URL + `api_triaje.php?consulta_id=${c.id}`);
+              const data = await res.json();
+              statusObj[c.id] = (data.success && data.triaje) ? 'Completado' : 'Pendiente';
+            } catch {
+              statusObj[c.id] = 'Pendiente';
+            }
+          }));
+          setTriajeStatus(statusObj);
         } else {
           setError(data.error || "Error al cargar consultas");
         }
@@ -97,13 +109,14 @@ function TriageList() {
               <th className="p-2">Médico</th>
               <th className="p-2">Fecha</th>
               <th className="p-2">Hora</th>
+              <th className="p-2">Estado</th>
               <th className="p-2">Acción</th>
             </tr>
           </thead>
           <tbody>
             {consultas.length === 0 ? (
               <tr>
-                <td colSpan={6} className="p-4 text-center text-gray-500">No hay pacientes pendientes de triaje.</td>
+                <td colSpan={7} className="p-4 text-center text-gray-500">No hay pacientes pendientes de triaje.</td>
               </tr>
             ) : (
               consultas.map((c) => (
@@ -113,6 +126,13 @@ function TriageList() {
                   <td className="p-2">{c.medico_nombre || '-'}</td>
                   <td className="p-2">{c.fecha}</td>
                   <td className="p-2">{c.hora}</td>
+                  <td className="p-2 font-semibold">
+                    {triajeStatus[c.id] === 'Completado' ? (
+                      <span className="text-green-600">Completado</span>
+                    ) : (
+                      <span className="text-yellow-600">Pendiente</span>
+                    )}
+                  </td>
                   <td className="p-2">
                     <button
                       className="bg-blue-600 text-white px-2 py-1 rounded"
