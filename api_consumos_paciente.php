@@ -32,8 +32,9 @@ file_put_contents(__DIR__.'/debug_session.txt', print_r([
 ], true));
 
 // Solo admin/administrador y recepcionista pueden acceder
+// Solo administrador y recepcionista pueden acceder
 $rol = $_SESSION['usuario']['rol'] ?? '';
-if (!in_array($rol, ['admin', 'administrador', 'recepcionista'])) {
+if (!in_array($rol, ['administrador', 'recepcionista'])) {
     http_response_code(403);
     echo json_encode(['error' => 'Acceso denegado']);
     exit;

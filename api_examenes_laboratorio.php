@@ -1,28 +1,7 @@
-<?php
-session_set_cookie_params([
-    'lifetime' => 0,
-    'path' => '/',
-    'domain' => '',
-    'secure' => true,
-    'httponly' => true,
-    'samesite' => 'None',
-]);
-session_start();
-// Permitir CORS
-// CORS para localhost y producción
-$allowedOrigins = [
-    'http://localhost:5173',
-    'https://darkcyan-gnu-615778.hostingersite.com'
-];
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-}
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json; charset=UTF-8');
 
+<?php
+// Protección de sesión unificada para usuarios y médicos
+require_once __DIR__ . '/auth_check.php';
 require_once "config.php";
 
 $method = $_SERVER['REQUEST_METHOD'];

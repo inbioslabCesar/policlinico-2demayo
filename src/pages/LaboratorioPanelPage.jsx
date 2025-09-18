@@ -11,7 +11,9 @@ function LaboratorioPanelPage() {
   const [resultadosOrden, setResultadosOrden] = useState(null);
 
   useEffect(() => {
-    fetch(BASE_URL + "api_examenes_laboratorio.php")
+    fetch(BASE_URL + "api_examenes_laboratorio.php", {
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(data => setExamenesDisponibles(data.examenes || []));
   }, []);

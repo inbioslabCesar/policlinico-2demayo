@@ -45,6 +45,8 @@ $result = $stmt->get_result();
 
 if ($row = $result->fetch_assoc()) {
     if (password_verify($password, $row['password'])) {
+        // Guardar el id del médico en la sesión para mantener autenticación
+        $_SESSION['medico_id'] = $row['id'];
         unset($row['password']);
         echo json_encode(['success' => true, 'medico' => $row]);
     } else {

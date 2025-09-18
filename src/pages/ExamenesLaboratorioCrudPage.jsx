@@ -78,7 +78,9 @@ export default function ExamenesLaboratorioCrudPage() {
 
   const fetchExamenes = async () => {
     setLoading(true);
-    const res = await fetch(BASE_URL + "api_examenes_laboratorio.php");
+    const res = await fetch(BASE_URL + "api_examenes_laboratorio.php", {
+      credentials: 'include'
+    });
     const data = await res.json();
     setExamenes(data.examenes || []);
     setLoading(false);
@@ -123,7 +125,8 @@ export default function ExamenesLaboratorioCrudPage() {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editId ? { ...form, id: editId } : form)
+      body: JSON.stringify(editId ? { ...form, id: editId } : form),
+      credentials: 'include'
     });
     const data = await res.json();
       if (data.success) {
@@ -183,7 +186,10 @@ export default function ExamenesLaboratorioCrudPage() {
 
   const handleDelete = async id => {
     if (!window.confirm("¿Eliminar este examen?")) return;
-    const res = await fetch(BASE_URL + `api_examenes_laboratorio.php?id=${id}`, { method: "DELETE" });
+    const res = await fetch(BASE_URL + `api_examenes_laboratorio.php?id=${id}`, {
+      method: "DELETE",
+      credentials: 'include'
+    });
     const data = await res.json();
     if (data.success) {
       setMsg("Examen eliminado");

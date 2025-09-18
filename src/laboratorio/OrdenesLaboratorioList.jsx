@@ -9,7 +9,9 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(BASE_URL + "api_ordenes_laboratorio.php")
+    fetch(BASE_URL + "api_ordenes_laboratorio.php", {
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(data => {
         console.log('Órdenes recibidas:', data);
@@ -23,7 +25,9 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
         console.error('Error al cargar órdenes:', err);
       });
     // Cargar lista de exámenes disponibles para mapear IDs a nombres
-    fetch(BASE_URL + "api_examenes_laboratorio.php")
+    fetch(BASE_URL + "api_examenes_laboratorio.php", {
+      credentials: 'include'
+    })
       .then(res => res.json())
       .then(data => {
         setExamenesDisponibles(data.examenes || []);
