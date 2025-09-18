@@ -59,10 +59,16 @@ switch ($method) {
             $ok = $stmt->execute();
             $stmt->close();
         }
-        // Actualizar clasificacion en la tabla consultas si existe
+        // Actualizar clasificacion y marcar triaje_realizado en la tabla consultas
         if ($clasificacion) {
-            $stmt2 = $conn->prepare('UPDATE consultas SET clasificacion = ? WHERE id = ?');
+            $stmt2 = $conn->prepare('UPDATE consultas SET clasificacion = ?, triaje_realizado = 1 WHERE id = ?');
             $stmt2->bind_param('si', $clasificacion, $consulta_id);
+            $stmt2->execute();
+            $stmt2->close();
+        } else {
+            // Si no hay clasificacion, igual marcar triaje_realizado
+            $stmt2 = $conn->prepare('UPDATE consultas SET triaje_realizado = 1 WHERE id = ?');
+            $stmt2->bind_param('i', $consulta_id);
             $stmt2->execute();
             $stmt2->close();
         }

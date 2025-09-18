@@ -9,6 +9,10 @@ function MedicoConsultas({ medicoId }) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  // Buscador dinámico
+  const [busqueda, setBusqueda] = useState("");
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState("");
 
   // Obtener la fecha de hoy en formato YYYY-MM-DD
     // Mostrar todas las consultas del médico
@@ -41,10 +45,28 @@ function MedicoConsultas({ medicoId }) {
       });
   };
 
+  // Filtrar por búsqueda y fechas
+  let consultasFiltradas = consultas.filter(c => {
+    // Filtro de búsqueda (nombre, apellido, historia clínica, dni)
+    const texto = busqueda.trim().toLowerCase();
+    if (texto) {
+      const match = (c.paciente_nombre && c.paciente_nombre.toLowerCase().includes(texto)) ||
+                   (c.paciente_apellido && c.paciente_apellido.toLowerCase().includes(texto)) ||
+                   (c.historia_clinica && c.historia_clinica.toLowerCase().includes(texto)) ||
+                   (c.dni && c.dni.toLowerCase().includes(texto));
+      if (!match) return false;
+    }
+    // Filtro de fechas (por campo fecha)
+    if (!fechaDesde && !fechaHasta) return true;
+    if (!c.fecha) return false;
+    if (fechaDesde && c.fecha < fechaDesde) return false;
+    if (fechaHasta && c.fecha > fechaHasta) return false;
+    return true;
+  });
   // Calcular datos paginados
-  const totalRows = consultas.length;
+  const totalRows = consultasFiltradas.length;
   const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
-  const pagedConsultas = consultas.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const pagedConsultas = consultasFiltradas.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   // Cambiar página y filas por página
   const handleRowsPerPage = (e) => {
@@ -57,6 +79,23 @@ function MedicoConsultas({ medicoId }) {
   return (
     <div className="flex flex-col items-center w-full p-2 sm:p-4">
       <h2 className="text-xl font-bold mb-4 text-center">Mis Consultas Agendadas</h2>
+      {/* Buscador dinámico */}
+      <div className="flex flex-wrap items-center gap-2 mb-2">
+        <input
+          type="text"
+          value={busqueda}
+          onChange={e => { setBusqueda(e.target.value); setPage(1); }}
+          placeholder="Buscar por nombre, HC o DNI..."
+          className="border rounded p-1 text-xs min-w-[180px]"
+        />
+        <label className="text-xs">Desde:</label>
+        <input type="date" value={fechaDesde} onChange={e => { setFechaDesde(e.target.value); setPage(1); }} className="border rounded p-1 text-xs" />
+        <label className="text-xs">Hasta:</label>
+        <input type="date" value={fechaHasta} onChange={e => { setFechaHasta(e.target.value); setPage(1); }} className="border rounded p-1 text-xs" />
+        {(fechaDesde || fechaHasta) && (
+          <button onClick={() => { setFechaDesde(""); setFechaHasta(""); setPage(1); }} className="text-blue-600 underline text-xs">Limpiar</button>
+        )}
+      </div>
       {loading ? <div>Cargando...</div> : (
         <div className="w-full flex justify-center">
           <div className="overflow-x-auto w-full max-w-xl">

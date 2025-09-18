@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BASE_URL } from "../config/config";
 
 function OrdenesLaboratorioList({ onSeleccionarOrden }) {
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [page, setPage] = useState(0);
   const [ordenes, setOrdenes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [examenesDisponibles, setExamenesDisponibles] = useState([]);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
+  const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -38,9 +43,65 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
   if (loading || examenesDisponibles.length === 0) return <div className="p-4">Cargando órdenes de laboratorio...</div>;
   if (error) return <div className="p-4 text-red-600">{error}</div>;
 
+  // Filtrado por rango de fecha, médico y paciente
+  const filtrarOrdenes = (lista) => {
+    return lista.filter(orden => {
+      // Filtrar por fecha
+      if ((fechaInicio || fechaFin) && orden.fecha) {
+        const fechaOrden = new Date(orden.fecha);
+        const desde = fechaInicio ? new Date(fechaInicio) : null;
+        const hasta = fechaFin ? new Date(fechaFin) : null;
+        if (desde && fechaOrden < desde) return false;
+        if (hasta && fechaOrden > new Date(hasta + 'T23:59:59')) return false;
+      }
+      // Filtrar por búsqueda general (paciente o médico)
+      if (busqueda.trim() !== "") {
+        const texto = busqueda.toLowerCase();
+        const paciente = (orden.paciente_nombre + ' ' + orden.paciente_apellido).toLowerCase();
+        const medico = (orden.medico_nombre || '').toLowerCase();
+        if (!paciente.includes(texto) && !medico.includes(texto)) return false;
+      }
+      return true;
+    });
+  };
+  const ordenesFiltradas = filtrarOrdenes(ordenes);
+  // Paginación
+  const totalPages = Math.ceil(ordenesFiltradas.length / rowsPerPage);
+  const paginated = ordenesFiltradas.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white rounded shadow mt-6">
       <h2 className="text-xl font-bold mb-4 text-center">Órdenes de Laboratorio</h2>
+      {/* Buscador por rango de fecha, médico y paciente */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <label className="text-xs">Desde:</label>
+          <input type="date" value={fechaInicio} onChange={e => { setFechaInicio(e.target.value); setPage(0); }} className="border rounded p-1 text-xs" />
+          <label className="text-xs">Hasta:</label>
+          <input type="date" value={fechaFin} onChange={e => { setFechaFin(e.target.value); setPage(0); }} className="border rounded p-1 text-xs" />
+          <input
+            type="text"
+            value={busqueda}
+            onChange={e => { setBusqueda(e.target.value); setPage(0); }}
+            placeholder="Buscar paciente o médico..."
+            className="border rounded p-1 text-xs ml-2"
+            style={{ minWidth: 180 }}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs">Filas por página:</label>
+          <select value={rowsPerPage} onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(0); }} className="border rounded p-1 text-xs">
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <button disabled={page === 0} onClick={() => setPage(p => Math.max(0, p - 1))} className="px-2 py-1 rounded bg-gray-200 disabled:opacity-50">&lt;</button>
+          <span>Página {page + 1} de {totalPages || 1}</span>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} className="px-2 py-1 rounded bg-gray-200 disabled:opacity-50">&gt;</button>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-[400px] w-full text-sm">
           <thead>
@@ -55,12 +116,12 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
             </tr>
           </thead>
           <tbody>
-            {ordenes.length === 0 ? (
+            {ordenesFiltradas.length === 0 ? (
               <tr>
                 <td colSpan={8} className="p-4 text-center text-gray-500">No hay órdenes registradas.</td>
               </tr>
             ) : (
-              ordenes.map(orden => (
+              paginated.map(orden => (
                 <tr key={orden.id} className="border-b">
                   <td className="p-2 whitespace-nowrap">{orden.id}</td>
                   <td className="p-2 whitespace-nowrap">{orden.paciente_nombre} {orden.paciente_apellido}</td>

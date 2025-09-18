@@ -20,7 +20,10 @@ function Login({ onLogin }) {
         body: JSON.stringify({ usuario, password }),
         credentials: "include"
       });
-      let data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch { data = {}; }
       if (res.ok && data.success) {
         sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
         onLogin && onLogin(data.usuario);
@@ -28,15 +31,18 @@ function Login({ onLogin }) {
         return;
       }
       // 2. Si falla, intentar como médico (email)
-      res = await fetch(BASE_URL + "api_login_medico.php", {
+      let resMedico = await fetch(BASE_URL + "api_login_medico.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: usuario, password }),
         credentials: "include"
       });
-      data = await res.json();
-      if (res.ok && data.success) {
-        const medicoConRol = { ...data.medico, rol: 'medico' };
+      let dataMedico;
+      try {
+        dataMedico = await resMedico.json();
+      } catch { dataMedico = {}; }
+      if (resMedico.ok && dataMedico.success) {
+        const medicoConRol = { ...dataMedico.medico, rol: 'medico' };
         sessionStorage.setItem('medico', JSON.stringify(medicoConRol));
         onLogin && onLogin(medicoConRol);
         navigate("/");

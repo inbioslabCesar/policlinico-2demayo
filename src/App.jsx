@@ -28,8 +28,13 @@ function App() {
     return null;
   });
 
-  // Al hacer logout, limpiar sessionStorage
-  const handleLogout = () => {
+  // Al hacer logout, limpiar sessionStorage y destruir sesión en backend
+  const handleLogout = async () => {
+    try {
+      await fetch('/policlinico-2demayo/api_logout.php', { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.error('Error al cerrar sesión en el backend:', err);
+    }
     setUsuario(null);
     sessionStorage.removeItem('usuario');
     sessionStorage.removeItem('medico');
