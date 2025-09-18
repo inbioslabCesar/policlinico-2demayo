@@ -12,44 +12,95 @@ function Login({ onLogin }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    const esEmail = usuario.includes("@") && usuario.includes(".");
     try {
-      // 1. Intentar login como usuario normal
-      let res = await fetch(BASE_URL + "api_login.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario, password }),
-        credentials: "include"
-      });
-      let data;
-      try {
-        data = await res.json();
-      } catch { data = {}; }
-      if (res.ok && data.success) {
-        sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
-        onLogin && onLogin(data.usuario);
-        navigate("/");
-        return;
-      }
-      // 2. Si falla, intentar como médico (email)
-      let resMedico = await fetch(BASE_URL + "api_login_medico.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: usuario, password }),
-        credentials: "include"
-      });
-      let dataMedico;
-      try {
-        dataMedico = await resMedico.json();
-      } catch { dataMedico = {}; }
-      if (resMedico.ok && dataMedico.success) {
-        const medicoConRol = { ...dataMedico.medico, rol: 'medico' };
-        sessionStorage.setItem('medico', JSON.stringify(medicoConRol));
-        onLogin && onLogin(medicoConRol);
-        navigate("/");
-        return;
+      if (esEmail) {
+        // 1. Intentar login como médico
+        let resMedico, dataMedico;
+        try {
+          resMedico = await fetch(BASE_URL + "api_login_medico.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: usuario, password }),
+            credentials: "include"
+          });
+          dataMedico = await resMedico.json();
+        } catch {
+          resMedico = { ok: false };
+          dataMedico = {};
+        }
+        if (resMedico.ok && dataMedico.success) {
+          const medicoConRol = { ...dataMedico.medico, rol: 'medico' };
+          sessionStorage.setItem('medico', JSON.stringify(medicoConRol));
+          onLogin && onLogin(medicoConRol);
+          navigate("/");
+          return;
+        }
+        // Si falla, intentar como usuario normal
+        let res, data;
+        try {
+          res = await fetch(BASE_URL + "api_login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario, password }),
+            credentials: "include"
+          });
+          data = await res.json();
+        } catch {
+          res = { ok: false };
+          data = {};
+        }
+        if (res.ok && data.success) {
+          sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
+          onLogin && onLogin(data.usuario);
+          navigate("/");
+          return;
+        }
+      } else {
+        // 1. Intentar login como usuario normal
+        let res, data;
+        try {
+          res = await fetch(BASE_URL + "api_login.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ usuario, password }),
+            credentials: "include"
+          });
+          data = await res.json();
+        } catch {
+          res = { ok: false };
+          data = {};
+        }
+        if (res.ok && data.success) {
+          sessionStorage.setItem('usuario', JSON.stringify(data.usuario));
+          onLogin && onLogin(data.usuario);
+          navigate("/");
+          return;
+        }
+        // Si falla, intentar como médico
+        let resMedico, dataMedico;
+        try {
+          resMedico = await fetch(BASE_URL + "api_login_medico.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: usuario, password }),
+            credentials: "include"
+          });
+          dataMedico = await resMedico.json();
+        } catch {
+          resMedico = { ok: false };
+          dataMedico = {};
+        }
+        if (resMedico.ok && dataMedico.success) {
+          const medicoConRol = { ...dataMedico.medico, rol: 'medico' };
+          sessionStorage.setItem('medico', JSON.stringify(medicoConRol));
+          onLogin && onLogin(medicoConRol);
+          navigate("/");
+          return;
+        }
       }
       setError("Usuario o contraseña incorrectos");
-    } catch (err) {
+    } catch {
       setError("Error de conexión con el servidor");
     }
   };
