@@ -15,8 +15,15 @@ const defaultItem = {
   orden: 1
 };
 
+import { useEffect } from "react";
+
 export default function ExamenEditorForm({ initialData = [], onChange }) {
   const [items, setItems] = useState(initialData);
+
+  // Sincronizar items con initialData cuando cambie (por ejemplo, al editar otro examen)
+  useEffect(() => {
+    setItems(initialData);
+  }, [initialData]);
 
   // Agregar nuevo parámetro o subtítulo
   const addItem = tipo => {
@@ -83,8 +90,15 @@ export default function ExamenEditorForm({ initialData = [], onChange }) {
       </div>
       {items.map((item, idx) => (
         <div key={idx} className="border rounded p-3 bg-gray-50 relative">
-          <button type="button" className="absolute top-2 right-2 text-red-600" onClick={() => removeItem(idx)}>Eliminar</button>
-          <div className="flex gap-2 mb-2">
+          <button
+            type="button"
+            className="absolute top-2 right-2 text-red-600 bg-red-100 hover:bg-red-200 border border-red-300 rounded-md px-2 py-1 transition-all flex items-center justify-center"
+            style={{ minWidth: 56, fontSize: 13 }}
+            onClick={() => removeItem(idx)}
+          >
+            Eliminar
+          </button>
+          <div className="flex flex-wrap gap-2 mb-2 items-center">
             <select value={item.tipo} onChange={e => handleItemChange(idx, "tipo", e.target.value)} className="border rounded px-2 py-1">
               <option value="Parámetro">Parámetro</option>
               <option value="Subtítulo">Subtítulo</option>
@@ -93,8 +107,8 @@ export default function ExamenEditorForm({ initialData = [], onChange }) {
             <label className="flex items-center gap-1">
               <input type="checkbox" checked={item.negrita} onChange={e => handleItemChange(idx, "negrita", e.target.checked)} /> Negrita
             </label>
-            <input type="color" value={item.color_texto} onChange={e => handleItemChange(idx, "color_texto", e.target.value)} title="Color texto" />
-            <input type="color" value={item.color_fondo} onChange={e => handleItemChange(idx, "color_fondo", e.target.value)} title="Color fondo" />
+            <input type="color" value={item.color_texto} onChange={e => handleItemChange(idx, "color_texto", e.target.value)} title="Color texto" style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, padding: 0, border: 'none' }} />
+            <input type="color" value={item.color_fondo} onChange={e => handleItemChange(idx, "color_fondo", e.target.value)} title="Color fondo" style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, padding: 0, border: 'none', marginRight: 64 }} />
           </div>
           {item.tipo === "Parámetro" && (
             <>
@@ -107,12 +121,19 @@ export default function ExamenEditorForm({ initialData = [], onChange }) {
                 <b>Referencias:</b>
                 <button type="button" className="ml-2 text-green-600" onClick={() => addReferencia(idx)}>+ Referencia</button>
                 {item.referencias.map((ref, refIdx) => (
-                  <div key={refIdx} className="flex gap-2 mt-1 items-center flex-wrap">
+                  <div key={refIdx} className="flex gap-2 mt-1 items-center flex-wrap relative">
                     <input value={ref.valor} onChange={e => handleReferenciaChange(idx, refIdx, "valor", e.target.value)} placeholder="Valor texto" className="border rounded px-2 py-1 w-28" />
                     <input value={ref.valor_min} onChange={e => handleReferenciaChange(idx, refIdx, "valor_min", e.target.value)} placeholder="Min" className="border rounded px-2 py-1 w-16" />
                     <input value={ref.valor_max} onChange={e => handleReferenciaChange(idx, refIdx, "valor_max", e.target.value)} placeholder="Max" className="border rounded px-2 py-1 w-16" />
                     <input value={ref.desc} onChange={e => handleReferenciaChange(idx, refIdx, "desc", e.target.value)} placeholder="Descripción" className="border rounded px-2 py-1 flex-1" />
-                    <button type="button" className="text-red-600 px-3 py-1 ml-2 border border-red-200 rounded" style={{ minWidth: '70px' }} onClick={() => removeReferencia(idx, refIdx)}>Eliminar</button>
+                    <button
+                      type="button"
+                      className="text-red-600 bg-red-100 hover:bg-red-200 border border-red-300 rounded-md px-2 py-1 ml-6 transition-all flex items-center justify-center"
+                      style={{ minWidth: 56, fontSize: 13, alignSelf: 'center' }}
+                      onClick={() => removeReferencia(idx, refIdx)}
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 ))}
               </div>

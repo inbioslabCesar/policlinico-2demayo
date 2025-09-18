@@ -25,7 +25,7 @@ export default function SolicitudLaboratorio({ consultaId }) {
 
   // Obtener todos los exámenes disponibles para mostrar nombres seleccionados
   React.useEffect(() => {
-    fetch(BASE_URL + "api_examenes_laboratorio.php")
+    fetch(BASE_URL + "api_examenes_laboratorio.php", { credentials: 'include' })
       .then(res => res.json())
       .then(data => setExamenesDisponibles(data.examenes || []));
   }, []);

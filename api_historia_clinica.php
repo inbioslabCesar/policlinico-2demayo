@@ -31,6 +31,23 @@ require_once __DIR__ . '/config.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    case 'GET':
+        $consulta_id = $_GET['consulta_id'] ?? null;
+        if (!$consulta_id) {
+            echo json_encode(['success' => false, 'error' => 'Falta consulta_id']);
+            exit;
+        }
+        $stmt = $conn->prepare('SELECT datos FROM historia_clinica WHERE consulta_id = ?');
+        $stmt->bind_param('i', $consulta_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        if ($row = $res->fetch_assoc()) {
+            echo json_encode(['success' => true, 'datos' => json_decode($row['datos'], true)]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'No existe historia clínica para esta consulta']);
+        }
+        $stmt->close();
+        break;
     case 'POST':
         $data = json_decode(file_get_contents('php://input'), true);
         $consulta_id = $data['consulta_id'] ?? null;

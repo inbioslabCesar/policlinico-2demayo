@@ -18,10 +18,10 @@ export default function ExamenesLaboratorioCrudPage() {
       doc.text("Exámenes de Laboratorio", 14, 10);
       autoTable(doc, {
         head: [[
-          "Nombre", "Metodología", "Valor Ref.", "Unidades", "Tubo", "Frasco", "Tiempo", "Condición", "Preanalítica", "Público", "Convenio"
+          "Nombre", "Metodología", "Tubo", "Frasco", "Tiempo", "Público", "Convenio"
         ]],
         body: filtered.map(ex => [
-          ex.nombre, ex.metodologia, ex.valor_referencial, ex.unidades, ex.tipo_tubo, ex.tipo_frasco, ex.tiempo_resultado, ex.condicion_paciente, ex.preanalitica, ex.precio_publico, ex.precio_convenio
+          ex.nombre, ex.metodologia, ex.tipo_tubo, ex.tipo_frasco, ex.tiempo_resultado, ex.precio_publico, ex.precio_convenio
         ]),
         startY: 18,
         styles: { fontSize: 8 }
@@ -38,13 +38,9 @@ export default function ExamenesLaboratorioCrudPage() {
     const ws = XLSX.utils.json_to_sheet(filtered.map(ex => ({
       Nombre: ex.nombre,
       Metodología: ex.metodologia,
-      "Valor Ref.": ex.valor_referencial,
-      Unidades: ex.unidades,
       Tubo: ex.tipo_tubo,
       Frasco: ex.tipo_frasco,
       Tiempo: ex.tiempo_resultado,
-      Condición: ex.condicion_paciente,
-      Preanalítica: ex.preanalitica,
       Público: ex.precio_publico,
       Convenio: ex.precio_convenio
     })));
@@ -248,16 +244,21 @@ export default function ExamenesLaboratorioCrudPage() {
                         ) : (
                           <tr key={idx}>
                             <td className="py-1 px-1" style={{ background: item.color_fondo, color: item.color_texto, fontWeight: item.negrita ? 'bold' : 'normal' }}>{item.nombre}</td>
-                            <td className="py-1 px-1 text-center">{item.metodologia}</td>
+                            <td className="py-1 px-1 text-center">{item.metodologia || ''}</td>
                             <td className="py-1 px-1 text-center text-gray-400">[Resultado]</td>
-                            <td className="py-1 px-1 text-center">{item.unidad}</td>
+                            <td className="py-1 px-1 text-center">{item.unidad || ''}</td>
                             <td className="py-1 px-1 text-center">
                               {item.referencias && item.referencias.length > 0 ? (
                                 <ul className="list-none p-0 m-0">
                                   {item.referencias.map((ref, rIdx) => (
                                     <li key={rIdx}>
-                                      <span className="text-gray-700">{ref.valor}</span>
-                                      {ref.desc && <span className="text-gray-500 ml-1">({ref.desc})</span>}
+                                        <span className="text-gray-700">
+                                          {ref.valor || ''}
+                                          {(ref.valor_min || ref.valor_max) && (
+                                            <> ({ref.valor_min ? ref.valor_min : '-'} - {ref.valor_max ? ref.valor_max : '-'})</>
+                                          )}
+                                        </span>
+                                        {ref.desc && <span className="text-gray-500 ml-1">({ref.desc})</span>}
                                     </li>
                                   ))}
                                 </ul>

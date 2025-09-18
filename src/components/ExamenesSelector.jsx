@@ -11,7 +11,7 @@ export default function ExamenesSelector({ selected, setSelected }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(BASE_URL + "api_examenes_laboratorio.php")
+    fetch(BASE_URL + "api_examenes_laboratorio.php", { credentials: 'include' })
       .then(res => res.json())
       .then(data => setExamenes(data.examenes || []))
       .finally(() => setLoading(false));
