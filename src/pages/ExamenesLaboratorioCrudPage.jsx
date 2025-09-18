@@ -1,7 +1,9 @@
 
+
 import React, { useEffect, useState } from "react";
 import { BASE_URL } from "../config/config";
 import Modal from "../components/Modal";
+import ExamenEditorForm from "../components/ExamenEditorForm";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -58,9 +60,7 @@ export default function ExamenesLaboratorioCrudPage() {
   const [form, setForm] = useState({
     nombre: "",
     metodologia: "",
-    valores_referenciales: [
-      { nombre: "", min: "", max: "", unidad: "" }
-    ],
+    valores_referenciales: [],
     precio_publico: "",
     precio_convenio: "",
     tipo_tubo: "",
@@ -93,28 +93,9 @@ export default function ExamenesLaboratorioCrudPage() {
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  // Manejar cambios en los valores referenciales
-  const handleValoresRefChange = (idx, field, value) => {
-    setForm(f => {
-      const nuevos = f.valores_referenciales.map((v, i) =>
-        i === idx ? { ...v, [field]: value } : v
-      );
-      return { ...f, valores_referenciales: nuevos };
-    });
-  };
-
-  const handleAddValorRef = () => {
-    setForm(f => ({
-      ...f,
-      valores_referenciales: [...f.valores_referenciales, { nombre: "", min: "", max: "", unidad: "" }]
-    }));
-  };
-
-  const handleRemoveValorRef = idx => {
-    setForm(f => ({
-      ...f,
-      valores_referenciales: f.valores_referenciales.filter((_, i) => i !== idx)
-    }));
+  // Manejar cambios en el editor visual avanzado
+  const handleValoresReferencialesChange = (val) => {
+    setForm(f => ({ ...f, valores_referenciales: val }));
   };
 
   const handleSubmit = async e => {
@@ -232,23 +213,65 @@ export default function ExamenesLaboratorioCrudPage() {
       {msg && <div className="mb-4 text-center text-green-700 font-semibold">{msg}</div>}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <h3 className="text-lg font-bold mb-2 text-center">{editId ? "Editar examen" : "Nuevo examen"}</h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-4 mb-2 md:mb-4 text-xs sm:text-sm">
+  <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-4 mb-2 md:mb-4 text-xs sm:text-sm">
           <input name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre del examen" className="border p-1 sm:p-2 rounded" required />
-          <input name="metodologia" value={form.metodologia} onChange={handleChange} placeholder="Metodología" className="border p-1 sm:p-2 rounded" />      
+          <input name="metodologia" value={form.metodologia} onChange={handleChange} placeholder="Metodología" className="border p-1 sm:p-2 rounded" />
           <div className="col-span-1 md:col-span-2">
-            <label className="font-semibold">Valores referenciales y unidades:</label>
-            {(Array.isArray(form.valores_referenciales) ? form.valores_referenciales : []).map((v, idx) => (
-              <div key={idx} className="flex gap-1 mb-1 items-center">
-                <input type="text" value={v.nombre} onChange={e => handleValoresRefChange(idx, 'nombre', e.target.value)} placeholder="Nombre" className="border p-1 rounded w-32" />
-                <input type="text" value={v.min} onChange={e => handleValoresRefChange(idx, 'min', e.target.value)} placeholder="Mín" className="border p-1 rounded w-16" />
-                <input type="text" value={v.max} onChange={e => handleValoresRefChange(idx, 'max', e.target.value)} placeholder="Máx" className="border p-1 rounded w-16" />
-                <input type="text" value={v.unidad} onChange={e => handleValoresRefChange(idx, 'unidad', e.target.value)} placeholder="Unidad" className="border p-1 rounded w-20" />
-                <button type="button" className="bg-red-500 text-white px-2 rounded" onClick={() => handleRemoveValorRef(idx)} disabled={form.valores_referenciales.length === 1}>-</button>
-                {idx === form.valores_referenciales.length - 1 && (
-                  <button type="button" className="bg-green-500 text-white px-2 rounded" onClick={handleAddValorRef}>+</button>
-                )}
-              </div>
-            ))}
+            <label className="font-semibold">Parámetros, subtítulos, valores de referencia, fórmulas y estilos:</label>
+            <ExamenEditorForm initialData={form.valores_referenciales} onChange={handleValoresReferencialesChange} />
+          </div>
+          {/* Previsualización visual tipo formato de laboratorio */}
+          <div className="col-span-1 md:col-span-2 mt-2">
+            <label className="font-semibold">Previsualización del formato de resultados:</label>
+            <div className="bg-white border rounded p-2 mt-1 overflow-auto" style={{ maxHeight: '320px', fontSize: '13px' }}>
+              <table className="min-w-full text-xs">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="p-1">Examen / Parámetro</th>
+                    <th className="p-1">Metodología</th>
+                    <th className="p-1">Resultado</th>
+                    <th className="p-1">Unidades</th>
+                    <th className="p-1">Valores de Referencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.isArray(form.valores_referenciales) && form.valores_referenciales.length > 0 ? (
+                    form.valores_referenciales
+                      .sort((a, b) => (a.orden || 0) - (b.orden || 0))
+                      .map((item, idx) => (
+                        item.tipo === "Subtítulo" ? (
+                          <tr key={idx}>
+                            <td colSpan={5} className={`py-2 px-1 ${item.negrita ? "font-bold" : "font-semibold"}`} style={{ background: item.color_fondo, color: item.color_texto, fontWeight: item.negrita ? 'bold' : 'normal' }}>
+                              {item.nombre}
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr key={idx}>
+                            <td className="py-1 px-1" style={{ background: item.color_fondo, color: item.color_texto, fontWeight: item.negrita ? 'bold' : 'normal' }}>{item.nombre}</td>
+                            <td className="py-1 px-1 text-center">{item.metodologia}</td>
+                            <td className="py-1 px-1 text-center text-gray-400">[Resultado]</td>
+                            <td className="py-1 px-1 text-center">{item.unidad}</td>
+                            <td className="py-1 px-1 text-center">
+                              {item.referencias && item.referencias.length > 0 ? (
+                                <ul className="list-none p-0 m-0">
+                                  {item.referencias.map((ref, rIdx) => (
+                                    <li key={rIdx}>
+                                      <span className="text-gray-700">{ref.valor}</span>
+                                      {ref.desc && <span className="text-gray-500 ml-1">({ref.desc})</span>}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : <span className="text-gray-400">-</span>}
+                            </td>
+                          </tr>
+                        )
+                      ))
+                  ) : (
+                    <tr><td colSpan={5} className="text-center text-gray-400">Sin parámetros definidos</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
           <input name="precio_publico" value={form.precio_publico} onChange={handleChange} placeholder="Precio público" className="border p-1 sm:p-2 rounded" type="number" min="0" />
           <input name="precio_convenio" value={form.precio_convenio} onChange={handleChange} placeholder="Precio convenio" className="border p-1 sm:p-2 rounded" type="number" min="0" />
@@ -259,7 +282,7 @@ export default function ExamenesLaboratorioCrudPage() {
           <input name="preanalitica" value={form.preanalitica} onChange={handleChange} placeholder="Preanalítica" className="border p-1 sm:p-2 rounded" />
           <div className="col-span-1 md:col-span-2 flex flex-col md:flex-row gap-1 md:gap-2 mt-1">
             <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full md:w-auto">{editId ? "Actualizar" : "Crear"}</button>
-            <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded w-full md:w-auto" onClick={() => { setEditId(null); setForm({ nombre: "", metodologia: "", valores_referenciales: [{ nombre: "", min: "", max: "", unidad: "" }], precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" }); setModalOpen(false); }}>Cancelar</button>
+            <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded w-full md:w-auto" onClick={() => { setEditId(null); setForm({ nombre: "", metodologia: "", valores_referenciales: [], precio_publico: "", precio_convenio: "", tipo_tubo: "", tipo_frasco: "", tiempo_resultado: "", condicion_paciente: "", preanalitica: "" }); setModalOpen(false); }}>Cancelar</button>
           </div>
         </form>
       </Modal>
