@@ -11,6 +11,7 @@ session_start();
 // CORS para localhost y producción
 $allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
     'https://darkcyan-gnu-615778.hostingersite.com'
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

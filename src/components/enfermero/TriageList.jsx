@@ -20,41 +20,17 @@ function TriageList() {
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
 
-  // Refrescar lista de consultas
+  // Refrescar lista de consultas y estados de triaje
   const recargarConsultas = () => {
-    setLoading(true);
-    fetch(BASE_URL + "api_consultas.php")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          const pendientes = data.consultas.filter(
-            (c) => c.estado === "pendiente" && (!c.triaje_realizado || c.triaje_realizado === "0")
-          );
-          setConsultas(pendientes);
-        } else {
-          setError(data.error || "Error al cargar consultas");
-        }
-        setLoading(false);
-      })
-      .catch((_err) => {
-        setError("Error de red");
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
     setLoading(true);
     fetch(BASE_URL + "api_consultas.php")
       .then((res) => res.json())
       .then(async (data) => {
         if (data.success) {
-          const pendientes = data.consultas.filter(
-            (c) => c.estado === "pendiente" && (!c.triaje_realizado || c.triaje_realizado === "0")
-          );
-          setConsultas(pendientes);
+          setConsultas(data.consultas);
           // Consultar estado de triaje para cada consulta
           const statusObj = {};
-          await Promise.all(pendientes.map(async (c) => {
+          await Promise.all(data.consultas.map(async (c) => {
             try {
               const res = await fetch(BASE_URL + `api_triaje.php?consulta_id=${c.id}`);
               const data = await res.json();
@@ -73,6 +49,10 @@ function TriageList() {
         setError("Error de red");
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    recargarConsultas();
   }, []);
 
   if (loading) return <div>Cargando pacientes en triaje...</div>;

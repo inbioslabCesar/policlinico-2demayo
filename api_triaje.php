@@ -11,6 +11,7 @@ session_start();
 // api_triaje.php: Guarda y consulta datos de triaje en formato JSON
 $allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
     'https://darkcyan-gnu-615778.hostingersite.com'
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -60,19 +61,25 @@ switch ($method) {
             $stmt->close();
         }
         // Actualizar clasificacion y marcar triaje_realizado en la tabla consultas
-        if ($clasificacion) {
-            $stmt2 = $conn->prepare('UPDATE consultas SET clasificacion = ?, triaje_realizado = 1 WHERE id = ?');
-            $stmt2->bind_param('si', $clasificacion, $consulta_id);
-            $stmt2->execute();
-            $stmt2->close();
-        } else {
-            // Si no hay clasificacion, igual marcar triaje_realizado
-            $stmt2 = $conn->prepare('UPDATE consultas SET triaje_realizado = 1 WHERE id = ?');
-            $stmt2->bind_param('i', $consulta_id);
-            $stmt2->execute();
-            $stmt2->close();
+        // Siempre actualizar clasificacion y marcar triaje_realizado
+        // Si no hay clasificacion, guardar como 'Sin clasificar'
+        $clasificacion_final = $clasificacion !== null && $clasificacion !== '' ? $clasificacion : 'Sin clasificar';
+        $stmt2 = $conn->prepare('UPDATE consultas SET clasificacion = ?, triaje_realizado = 1 WHERE id = ?');
+        if (!$stmt2) {
+            error_log('Error al preparar UPDATE consultas: ' . $conn->error);
+            echo json_encode(['success' => false, 'error' => 'Error al preparar UPDATE consultas', 'mysqli_error' => $conn->error]);
+            exit;
         }
-        echo json_encode(['success' => $ok, 'updated' => true]);
+        $stmt2->bind_param('si', $clasificacion_final, $consulta_id);
+        $exec_ok = $stmt2->execute();
+        if (!$exec_ok) {
+            error_log('Error al ejecutar UPDATE consultas: ' . $stmt2->error);
+            echo json_encode(['success' => false, 'error' => 'Error al ejecutar UPDATE consultas', 'mysqli_error' => $stmt2->error]);
+            $stmt2->close();
+            exit;
+        }
+        $stmt2->close();
+        echo json_encode(['success' => $ok, 'updated' => true, 'update_consultas_ok' => $exec_ok, 'clasificacion_final' => $clasificacion_final]);
         $stmt_check->close();
         break;
     case 'GET':

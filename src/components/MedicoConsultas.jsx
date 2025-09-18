@@ -128,6 +128,12 @@ function MedicoConsultas({ medicoId }) {
                     rowColor = 'bg-green-100';
                     etiqueta = <span className="bg-green-600 text-white px-2 py-0.5 rounded text-xs ml-2">NO URGENTE</span>;
                   }
+                  // Mostrar siempre el estado real
+                  let estadoMostrar = c.estado;
+                  // Si el triaje ya se hizo (clasificacion no nula), mostrar como 'completado' si el estado es 'pendiente'
+                  if (c.clasificacion && c.estado === 'pendiente') {
+                    estadoMostrar = 'completado';
+                  }
                   return (
                     <tr key={c.id} className={rowColor}>
                       <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2">{c.fecha}</td>
@@ -140,9 +146,9 @@ function MedicoConsultas({ medicoId }) {
                       {/* Tipo de consulta/triaje */}
                       {c.clasificacion ? c.clasificacion : <span className="text-gray-400 italic">Sin clasificar</span>}
                     </td>
-                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 font-bold">{c.estado}</td>
+                    <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 font-bold">{estadoMostrar}</td>
                     <td className="px-1 py-0.5 sm:px-2 md:px-3 md:py-2 flex flex-wrap gap-0.5 sm:gap-2">
-                      {c.estado === 'pendiente' && (
+                      {c.estado === 'pendiente' && !c.clasificacion && (
                         <>
                           <button onClick={() => actualizarEstado(c.id, 'completada')} className="bg-green-600 text-white px-1 py-0.5 rounded text-lg md:text-xl" title="Completar">
                             <span role="img" aria-label="Completar">✔️</span>
