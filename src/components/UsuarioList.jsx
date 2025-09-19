@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Spinner from "./Spinner";
 import Swal from 'sweetalert2';
 import UsuarioForm from "./UsuarioForm";
 import { BASE_URL } from "../config/config";
@@ -234,7 +235,7 @@ function UsuarioList() {
         </select>
       </div>
       {loading ? (
-        <div>Cargando...</div>
+        <Spinner message="Cargando usuarios..." />
       ) : error ? (
         <div className="text-red-600">{error}</div>
       ) : (

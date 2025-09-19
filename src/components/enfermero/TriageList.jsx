@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import Spinner from "../Spinner";
 import { BASE_URL } from "../../config/config";
 import TriageForm from "./TriageForm";
 
@@ -55,7 +56,7 @@ function TriageList() {
     recargarConsultas();
   }, []);
 
-  if (loading) return <div>Cargando pacientes en triaje...</div>;
+  if (loading) return <Spinner message="Cargando pacientes en triaje..." />;
   if (error) return <div className="text-red-600">{error}</div>;
 
   // Filtrar por búsqueda y fechas

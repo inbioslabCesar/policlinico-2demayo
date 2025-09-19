@@ -191,6 +191,12 @@ ruta local
 export const BASE_URL = "http://localhost/policlinico-2demayo/";
 ruta hsotinguer
 export const BASE_URL = "https://darkcyan-gnu-615778.hostingersite.com/";
+
+contraseña = "Clinica2demayo18-09-25";
+Nombre de la base de datos MySQL = "u330560936_2demayobd";
+Nombre de usuario MySQL = "u330560936_2demayo";
+Contraseña = Clinica2demayo18-09-25
+
 ---
 Flujo de Consulta Médica
 El médico/especialista define su disponibilidad:

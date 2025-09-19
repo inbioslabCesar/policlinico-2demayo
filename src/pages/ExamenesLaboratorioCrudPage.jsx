@@ -1,6 +1,7 @@
 
 
 import React, { useEffect, useState } from "react";
+import Spinner from "../components/Spinner";
 import { BASE_URL } from "../config/config";
 import Modal from "../components/Modal";
 import ExamenEditorForm from "../components/ExamenEditorForm";
@@ -320,7 +321,7 @@ export default function ExamenesLaboratorioCrudPage() {
           </thead>
           <tbody className="bg-white">
             {loading ? (
-              <tr><td colSpan={12} className="text-center p-4">Cargando...</td></tr>
+              <tr><td colSpan={12} className="text-center p-4"><Spinner message="Cargando exámenes de laboratorio..." /></td></tr>
             ) : examenes.length === 0 ? (
               <tr><td colSpan={12} className="text-center p-4">Sin exámenes registrados</td></tr>
             ) : (

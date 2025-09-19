@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Spinner from "./Spinner";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../config/config";
 
@@ -96,7 +97,7 @@ function MedicoConsultas({ medicoId }) {
           <button onClick={() => { setFechaDesde(""); setFechaHasta(""); setPage(1); }} className="text-blue-600 underline text-xs">Limpiar</button>
         )}
       </div>
-      {loading ? <div>Cargando...</div> : (
+  {loading ? <Spinner message="Cargando consultas agendadas..." /> : (
         <div className="w-full flex justify-center">
           <div className="overflow-x-auto w-full max-w-xl">
             <table className="min-w-[400px] w-full text-[11px] sm:text-sm md:text-base border bg-white rounded shadow mx-auto">

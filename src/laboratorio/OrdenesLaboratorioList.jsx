@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Spinner from "../components/Spinner";
 import { BASE_URL } from "../config/config";
 
 function OrdenesLaboratorioList({ onSeleccionarOrden }) {
@@ -40,7 +41,7 @@ function OrdenesLaboratorioList({ onSeleccionarOrden }) {
       });
   }, []);
 
-  if (loading || examenesDisponibles.length === 0) return <div className="p-4">Cargando órdenes de laboratorio...</div>;
+  if (loading || examenesDisponibles.length === 0) return <Spinner message="Cargando órdenes de laboratorio..." />;
   if (error) return <div className="p-4 text-red-600">{error}</div>;
 
   // Filtrado por rango de fecha, médico y paciente

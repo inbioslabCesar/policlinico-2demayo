@@ -6,6 +6,8 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+import Spinner from "./Spinner";
 import { BASE_URL } from "../config/config";
 
 function MedicoList() {
@@ -240,7 +242,7 @@ function MedicoList() {
         </div>
       </div>
       {loading ? (
-        <p>Cargando...</p>
+        <Spinner message="Cargando médicos..." />
       ) : error ? (
         <p className="text-red-600">{error}</p>
       ) : (
