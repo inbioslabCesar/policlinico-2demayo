@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Footer from "./Footer";
-
-// Sidebar and Navbar are used below in DashboardLayout
+import { Icon } from '@fluentui/react';
+import { initializeIcons } from '@fluentui/font-icons-mdl2';
+initializeIcons();
 function Sidebar({ open, onClose, onLogout, usuario }) {
   // Sidebar fijo en PC (md+), drawer en móvil/tablet
   return (
@@ -22,13 +23,23 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
         <div className="flex flex-col h-full min-h-0">
           <div className="flex flex-col items-center py-6">
             <img src="/2demayo.svg" alt="Logo" className="h-14 w-14 object-contain bg-white rounded-full p-1 mb-2 shadow" onError={e => { e.target.onerror = null; e.target.src = '/logo.svg'; }} />
-            <h5 className="text-lg font-bold text-purple-800 mb-2">Policlínico 2 de Mayo</h5>
+            <h5 className="text-lg font-bold text-purple-800 mb-2">Clínica 2 de Mayo</h5>
           </div>
           <nav className="flex flex-col gap-2 px-4 flex-1 overflow-y-auto">
             {usuario?.rol === 'medico' ? (
               <>
-                <Link to="/mis-consultas" className="py-2 px-3 rounded-lg text-indigo-700 hover:bg-indigo-100 font-medium" onClick={onClose}>Mis Consultas</Link>
-                <Link to="/panel-medico" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium" onClick={onClose}>Disponibilidad</Link>
+                <Link to="/mis-consultas" className="py-2 px-3 rounded-lg text-indigo-700 hover:bg-indigo-100 font-medium flex items-center gap-2" onClick={onClose}>
+                  <Icon iconName="Contact" className="text-xl" />
+                  Mis Consultas
+                </Link>
+                <Link to="/panel-medico" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium flex items-center gap-2" onClick={onClose}>
+                  <Icon iconName="Calendar" className="text-xl" />
+                  Disponibilidad
+                </Link>
+                <Link to="/historial-consultas" className="py-2 px-3 rounded-lg text-blue-700 hover:bg-blue-100 font-medium flex items-center gap-2" onClick={onClose}>
+                  <Icon iconName="History" className="text-xl" />
+                  Historial de consultas
+                </Link>
               </>
             ) : usuario?.rol === 'enfermero' ? (
               <>
@@ -38,6 +49,10 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
               <>
                 <Link to="/panel-laboratorio" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Panel Laboratorio</Link>
                 <Link to="/examenes-laboratorio" className="py-2 px-3 rounded-lg text-green-700 hover:bg-green-100 font-medium" onClick={onClose}>Gestión de Exámenes</Link>
+              </>
+            ) : (usuario?.rol === 'químico' || usuario?.rol === 'quimico') ? (
+              <>
+                <Link to="/medicamentos" className="py-2 px-3 rounded-lg text-pink-700 hover:bg-pink-100 font-medium" onClick={onClose}>Medicamentos</Link>
               </>
             ) : (
               <>
@@ -54,6 +69,7 @@ function Sidebar({ open, onClose, onLogout, usuario }) {
               </>
             )}
           </nav>
+
           <div className="mt-auto p-4">
             <button onClick={onLogout} className="w-full bg-purple-800 text-white font-bold rounded-lg py-2 shadow hover:bg-blue-500 transition-colors">Cerrar sesión</button>
           </div>
@@ -69,7 +85,7 @@ function Navbar({ usuario, onMenu }) {
     <header className="flex items-center justify-between px-6 py-3 bg-purple-800 shadow text-white">
       <div className="flex items-center gap-3">
         <img src="/2demayo.svg" alt="Logo" className="h-10 w-10 object-contain bg-white rounded-full p-1 shadow" />
-        <span className="text-xl font-bold drop-shadow">Policlínico 2 de Mayo</span>
+        <span className="text-xl font-bold drop-shadow">Clínica 2 de Mayo</span>
       </div>
       <div className="flex items-center gap-4">
         <span className="font-semibold text-white/90">{usuario?.nombre || "Usuario"}</span>

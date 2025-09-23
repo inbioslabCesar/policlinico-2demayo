@@ -43,8 +43,15 @@ export default function SolicitudLaboratorio({ consultaId }) {
             {seleccionados.map(ex => (
               <li key={ex.id} className="flex items-center gap-2">
                 <span>{ex.nombre}</span>
-                {ex.condicion_paciente && (
-                  <span className="text-gray-400 text-[11px] italic">{ex.condicion_paciente}</span>
+                {(ex.condicion_paciente || ex.tiempo_resultado) && (
+                  <span className="ml-2 text-gray-400 text-[11px] italic flex flex-col gap-0.5">
+                    {ex.condicion_paciente && (
+                      <span>{ex.condicion_paciente}</span>
+                    )}
+                    {ex.tiempo_resultado && (
+                      <span>Tiempo resultado: {ex.tiempo_resultado}</span>
+                    )}
+                  </span>
                 )}
               </li>
             ))}

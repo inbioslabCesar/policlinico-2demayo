@@ -31,6 +31,25 @@ require_once __DIR__ . '/config.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    case 'GET':
+        // Obtener resultados de laboratorio por consulta_id
+        $consulta_id = isset($_GET['consulta_id']) ? intval($_GET['consulta_id']) : null;
+        if (!$consulta_id) {
+            echo json_encode(['success' => false, 'error' => 'Falta consulta_id']);
+            exit;
+        }
+        $stmt = $conn->prepare('SELECT * FROM resultados_laboratorio WHERE consulta_id = ?');
+        $stmt->bind_param('i', $consulta_id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $resultados = [];
+        while ($row = $res->fetch_assoc()) {
+            $row['resultados'] = json_decode($row['resultados'], true);
+            $resultados[] = $row;
+        }
+        $stmt->close();
+        echo json_encode(['success' => true, 'resultados' => $resultados]);
+        break;
     case 'POST':
         // Guardar resultados de laboratorio
         $data = json_decode(file_get_contents('php://input'), true);

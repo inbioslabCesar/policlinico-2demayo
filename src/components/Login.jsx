@@ -109,8 +109,8 @@ function Login({ onLogin }) {
   <div className="flex justify-center items-center min-h-0 md:min-h-screen py-8">
       <div className="w-full max-w-sm bg-white/95 rounded-xl border border-blue-400 shadow-lg p-6">
         <div className="flex flex-col items-center mb-4">
-          <img src="/2demayo.svg" alt="Logo Policlínico" className="h-14 w-14 object-contain bg-white rounded-full p-1 mb-2 shadow" />
-          <h1 className="text-lg font-bold text-purple-800 mb-0 drop-shadow">Policlínico 2 de Mayo</h1>
+          <img src="/2demayo.svg" alt="Logo clínica" className="h-14 w-14 object-contain bg-white rounded-full p-1 mb-2 shadow" />
+          <h1 className="text-lg font-bold text-purple-800 mb-0 drop-shadow">Clínica 2 de Mayo</h1>
           <h2 className="text-sm font-semibold text-blue-500 mb-2">Ingreso al Sistema</h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

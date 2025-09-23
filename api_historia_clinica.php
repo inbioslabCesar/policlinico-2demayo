@@ -76,6 +76,12 @@ switch ($method) {
             $ok = $stmt->execute();
             $stmt->close();
         }
+        // Actualizar estado de la consulta a 'completada'
+        $stmt_estado = $conn->prepare('UPDATE consultas SET estado = ? WHERE id = ?');
+        $estado_completada = 'completada';
+        $stmt_estado->bind_param('si', $estado_completada, $consulta_id);
+        $stmt_estado->execute();
+        $stmt_estado->close();
         echo json_encode(['success' => $ok]);
         $stmt_check->close();
         break;

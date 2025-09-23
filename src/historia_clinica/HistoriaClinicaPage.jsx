@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BASE_URL } from "../config/config";
-import SolicitudLaboratorio from "../components/SolicitudLaboratorio"; // This line remains for context
-import ResultadosLaboratorio from "../components/ResultadosLaboratorio"; // This line remains for context
 import TabsApoyoDiagnostico from "../components/TabsApoyoDiagnostico";
 import FormularioHistoriaClinica from "../components/FormularioHistoriaClinica";
 import TriajePaciente from "../components/TriajePaciente";
 import DatosPaciente from "../components/DatosPaciente";
-import DiagnosticoCIE10 from "../components/DiagnosticoCIE10";
+import DiagnosticoCIE10Selector from "../components/DiagnosticoCIE10Selector";
 import TratamientoPaciente from "../components/TratamientoPaciente";
 
 function HistoriaClinicaPage() {
   const { pacienteId, consultaId } = useParams();
   // Resultados de laboratorio
   const [resultadosLab, setResultadosLab] = useState([]);
+  // Órdenes de laboratorio (exámenes solicitados)
+  const [ordenesLab, setOrdenesLab] = useState([]);
 
   // Cargar resultados de laboratorio por consulta
   useEffect(() => {
@@ -25,6 +25,14 @@ function HistoriaClinicaPage() {
         else setResultadosLab([]);
       })
       .catch(() => setResultadosLab([]));
+    // Cargar órdenes de laboratorio (exámenes solicitados)
+    fetch(`${BASE_URL}api_ordenes_laboratorio.php?consulta_id=${consultaId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.ordenes)) setOrdenesLab(data.ordenes);
+        else setOrdenesLab([]);
+      })
+      .catch(() => setOrdenesLab([]));
   }, [consultaId]);
   const [paciente, setPaciente] = useState(null);
   const [triaje, setTriaje] = useState(null);
@@ -37,19 +45,31 @@ function HistoriaClinicaPage() {
     curso: "",
     antecedentes: "",
     examen_fisico: "",
+    tratamiento: "",
+    receta: [],
   });
   const [guardando, setGuardando] = useState(false);
   const [msg, setMsg] = useState("");
+  // Diagnósticos CIE10
+  const [diagnosticos, setDiagnosticos] = useState([]);
   // Cargar datos de historia clínica editable
   useEffect(() => {
     if (!consultaId) return;
     fetch(`${BASE_URL}api_historia_clinica.php?consulta_id=${consultaId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.hc && data.hc.datos)
-          setHc({ ...hc, ...data.hc.datos });
+        if (data.success && data.datos) {
+          setHc({
+            ...data.datos,
+            receta: Array.isArray(data.datos.receta) ? data.datos.receta : [],
+          });
+          if (Array.isArray(data.datos.diagnosticos)) {
+            setDiagnosticos(data.datos.diagnosticos);
+          } else {
+            setDiagnosticos([]);
+          }
+        }
       });
-    // eslint-disable-next-line
   }, [consultaId]);
 
   useEffect(() => {
@@ -97,19 +117,17 @@ function HistoriaClinicaPage() {
       <hr className="my-4" />
       <TriajePaciente triaje={triaje} />
 
-      <FormularioHistoriaClinica
-        hc={hc}
-        setHc={setHc}
-        guardando={guardando}
-        msg={msg}
+      <form
         onSubmit={async (e) => {
           e.preventDefault();
           setGuardando(true);
           setMsg("");
+          // Asegura que receta y diagnosticos siempre estén actualizados
+          const datos = { ...hc, diagnosticos, receta: hc.receta };
           const res = await fetch(`${BASE_URL}api_historia_clinica.php`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ consulta_id: consultaId, datos: hc }),
+            body: JSON.stringify({ consulta_id: consultaId, datos }),
           });
           const data = await res.json();
           setGuardando(false);
@@ -119,21 +137,65 @@ function HistoriaClinicaPage() {
               : data.error || "Error al guardar"
           );
         }}
-      />
+        className="space-y-4"
+      >
 
-      <h3 className="text-lg font-semibold mb-2 mt-4">
-        Laboratorio y Apoyo al Diagnóstico
-      </h3>
+        <FormularioHistoriaClinica hc={hc} setHc={setHc} />
 
-        <TabsApoyoDiagnostico consultaId={consultaId} resultadosLab={resultadosLab} />
+        {/* Laboratorio y Apoyo al Diagnóstico */}
+        <h3 className="text-lg font-semibold mb-2 mt-4">
+          Laboratorio y Apoyo al Diagnóstico
+        </h3>
+        <TabsApoyoDiagnostico
+          consultaId={consultaId}
+          resultadosLab={resultadosLab}
+          ordenesLab={ordenesLab}
+        />
 
-      <DiagnosticoCIE10 />
 
-      <TratamientoPaciente />
+        {/* Editor de diagnósticos */}
+        <DiagnosticoCIE10Selector
+          diagnosticos={diagnosticos}
+          setDiagnosticos={setDiagnosticos}
+        />
 
-      <div className="mt-6 text-right text-xs text-gray-500">
-        FIRMA Y SELLO/MÉDICO
-      </div>
+        
+
+        {/* Editor y tabla de receta médica (unificado) */}
+        <TratamientoPaciente
+          receta={hc.receta || []}
+          setReceta={(recetaNueva) =>
+            setHc((h) => ({
+              ...h,
+              receta:
+                typeof recetaNueva === 'function'
+                  ? recetaNueva(h.receta)
+                  : recetaNueva,
+            }))
+          }
+          tratamiento={hc.tratamiento || ""}
+          setTratamiento={valor => setHc(h => ({ ...h, tratamiento: valor }))}
+        />
+
+        {/* boton guardar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-2">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded order-1 sm:order-none"
+            disabled={guardando}
+          >
+            {guardando ? "Guardando..." : "Guardar"}
+          </button>
+          <div className="text-right text-xs text-gray-500 order-2 sm:order-none w-full sm:w-auto">
+            FIRMA Y SELLO/MÉDICO
+          </div>
+        </div>
+        {msg && (
+          <div className="mt-2 text-center text-green-700 font-semibold">
+            {msg}
+          </div>
+        )}
+      </form>
     </div>
   );
 }

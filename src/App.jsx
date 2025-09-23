@@ -1,5 +1,11 @@
 import LaboratorioPanelPage from "./pages/LaboratorioPanelPage";
+import ResultadosLaboratorioPage from "./pages/ResultadosLaboratorioPage";
+import ReportesPage from "./pages/ReportesPage";
+import ListaConsultasPage from "./pages/ListaConsultasPage";
+import ReportePacientesPage from "./pages/ReportePacientesPage";
+import ReporteFinanzasPage from "./pages/ReporteFinanzasPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import MedicamentosList from "./farmacia/MedicamentosList";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
@@ -13,6 +19,7 @@ import MedicoConsultasPage from "./pages/MedicoConsultasPage";
 import MedicosPage from "./pages/MedicosPage";
 import PanelMedicoPage from "./pages/PanelMedicoPage";
 import HistoriaClinicaPage from "./historia_clinica/HistoriaClinicaPage";
+import HistorialConsultasMedico from "./historia_clinica/HistorialConsultasMedico";
 import EnfermeroPanelPage from "./pages/EnfermeroPanelPage";
 import SolicitudLaboratorioPage from "./pages/SolicitudLaboratorioPage";
 import ExamenesLaboratorioCrudPage from "./pages/ExamenesLaboratorioCrudPage";
@@ -67,7 +74,9 @@ function App() {
                   ? <Navigate to="/panel-laboratorio" replace />
                   : usuario?.rol === 'enfermero'
                     ? <Navigate to="/panel-enfermero" replace />
-                    : <Dashboard usuario={usuario} />
+                    : (usuario?.rol === 'químico' || usuario?.rol === 'quimico')
+                      ? <Navigate to="/medicamentos" replace />
+                      : <Dashboard usuario={usuario} />
             } />
             <Route path="/pacientes" element={
               <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
@@ -107,9 +116,19 @@ function App() {
                     <HistoriaClinicaPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/historial-consultas" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <HistorialConsultasMedico medicoId={usuario.id} />
+                  </ProtectedRoute>
+                } />
                 <Route path="/solicitud-laboratorio/:consultaId" element={
                   <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
                     <SolicitudLaboratorioPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/resultados-laboratorio/:consultaId" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["medico"]}>
+                    <ResultadosLaboratorioPage />
                   </ProtectedRoute>
                 } />
               </>
@@ -122,13 +141,35 @@ function App() {
                 </ProtectedRoute>
               } />
             )}
-            {/* Solo visible para administradores */}
-            {usuario?.rol === 'administrador' && (
-              <Route path="/medicos" element={
-                <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador"]}>
-                  <MedicosPage />
-                </ProtectedRoute>
-              } />
+            {/* Solo visible para administradores y recepcionistas */}
+            {(usuario?.rol === 'administrador' || usuario?.rol === 'recepcionista') && (
+              <>
+                <Route path="/medicos" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador"]}>
+                    <MedicosPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/reportes" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
+                    <ReportesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/lista-consultas" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
+                    <ListaConsultasPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/reporte-pacientes" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
+                    <ReportePacientesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/reporte-finanzas" element={
+                  <ProtectedRoute usuario={usuario} rolesPermitidos={["administrador","recepcionista"]}>
+                    <ReporteFinanzasPage />
+                  </ProtectedRoute>
+                } />
+              </>
             )}
             {/* Solo visible para laboratoristas */}
             {usuario?.rol === 'laboratorista' && (
@@ -144,6 +185,14 @@ function App() {
                   </ProtectedRoute>
                 } />
               </>
+            )}
+            {/* Solo visible para químicos */}
+            {(usuario?.rol === 'químico' || usuario?.rol === 'quimico') && (
+              <Route path="/medicamentos" element={
+                <ProtectedRoute usuario={usuario} rolesPermitidos={["químico","quimico"]}>
+                  <MedicamentosList />
+                </ProtectedRoute>
+              } />
             )}
             {/* Puedes agregar más rutas aquí */}
           </Routes>
