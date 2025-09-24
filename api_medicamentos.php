@@ -1,14 +1,37 @@
 <?php
-// api_medicamentos.php
-require_once "config.php";
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
+// --- Bloque de CORS y sesión seguro ---
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
+$allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://darkcyan-gnu-615778.hostingersite.com'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+header('Content-Type: application/json');
+
+// --- Verificación de sesión ---
+require_once __DIR__ . '/auth_check.php';
+
+// --- Lógica principal ---
+require_once "config.php";
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -18,7 +41,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch ($method) {
     case 'GET':
         // Listar medicamentos
-    $sql = "SELECT * FROM medicamentos ORDER BY nombre";
+        $sql = "SELECT * FROM medicamentos ORDER BY nombre";
         $result = $conn->query($sql);
         $medicamentos = [];
         while ($row = $result->fetch_assoc()) {

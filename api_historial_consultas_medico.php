@@ -1,9 +1,37 @@
 <?php
-// Permitir CORS para desarrollo
-header('Access-Control-Allow-Origin: *');
-// api_historial_consultas_medico.php
-require_once "db.php";
+// --- Bloque de CORS y sesión seguro ---
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'None',
+]);
+session_start();
+$allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://darkcyan-gnu-615778.hostingersite.com'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($origin, $allowedOrigins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 header('Content-Type: application/json');
+
+// --- Verificación de sesión ---
+require_once __DIR__ . '/auth_check.php';
+
+// --- Lógica principal ---
+require_once "db.php";
 
 $medico_id = isset($_GET['medico_id']) ? intval($_GET['medico_id']) : 0;
 if (!$medico_id) {
@@ -22,7 +50,6 @@ $stmt->execute([$medico_id]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Resumir datos para la tabla
-
 $historial = array_map(function($row) {
     $datos = json_decode($row['datos'], true);
     return [

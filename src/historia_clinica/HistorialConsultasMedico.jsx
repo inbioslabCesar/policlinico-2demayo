@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { BASE_URL } from "../config/config";
 export default function HistorialConsultasMedico({ medicoId }) {
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,9 +10,12 @@ export default function HistorialConsultasMedico({ medicoId }) {
 
   useEffect(() => {
     setLoading(true);
-  fetch(`http://localhost/policlinico-2demayo/api_historial_consultas_medico.php?medico_id=${medicoId}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(
+      `${BASE_URL}api_historial_consultas_medico.php?medico_id=${medicoId}`,
+      { credentials: "include" }
+    )
+      .then((res) => res.json())
+      .then((data) => {
         if (data.success) setHistorial(data.historial);
         else setError(data.error || "Error al cargar historial");
         setLoading(false);
@@ -23,10 +26,11 @@ export default function HistorialConsultasMedico({ medicoId }) {
       });
   }, [medicoId]);
 
-  const historialFiltrado = historial.filter(h =>
-    h.paciente_nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    h.motivo.toLowerCase().includes(busqueda.toLowerCase()) ||
-    h.diagnostico.toLowerCase().includes(busqueda.toLowerCase())
+  const historialFiltrado = historial.filter(
+    (h) =>
+      h.paciente_nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      h.motivo.toLowerCase().includes(busqueda.toLowerCase()) ||
+      h.diagnostico.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -37,7 +41,7 @@ export default function HistorialConsultasMedico({ medicoId }) {
         className="border rounded p-2 mb-4 w-full"
         placeholder="Buscar por paciente, motivo o diagnóstico"
         value={busqueda}
-        onChange={e => setBusqueda(e.target.value)}
+        onChange={(e) => setBusqueda(e.target.value)}
       />
       {loading ? (
         <div>Cargando...</div>
@@ -58,28 +62,38 @@ export default function HistorialConsultasMedico({ medicoId }) {
             </thead>
             <tbody>
               {historialFiltrado.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-2">Sin resultados</td></tr>
-              ) : historialFiltrado.map(h => (
-                <tr key={h.id} className="hover:bg-blue-50">
-                  <td className="border px-2 py-1">{h.fecha}</td>
-                  <td className="border px-2 py-1">{h.paciente_nombre}</td>
-                  <td className="border px-2 py-1">{h.motivo}</td>
-                  <td className="border px-2 py-1">{h.diagnostico}</td>
-                  <td className="border px-2 py-1">{h.estado}</td>
-                  <td className="border px-2 py-1 text-center">
-                    <button
-                      className="text-blue-600 underline"
-                      onClick={() => navigate(`/historia-clinica/${h.paciente_id}/${h.consulta_id}`)}
-                    >
-                      Ver
-                    </button>
+                <tr>
+                  <td colSpan={6} className="text-center py-2">
+                    Sin resultados
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ) : (
+                historialFiltrado.map((h) => (
+                  <tr key={h.id} className="hover:bg-blue-50">
+                    <td className="border px-2 py-1">{h.fecha}</td>
+                    <td className="border px-2 py-1">{h.paciente_nombre}</td>
+                    <td className="border px-2 py-1">{h.motivo}</td>
+                    <td className="border px-2 py-1">{h.diagnostico}</td>
+                    <td className="border px-2 py-1">{h.estado}</td>
+                    <td className="border px-2 py-1 text-center">
+                      <button
+                        className="text-blue-600 underline"
+                        onClick={() =>
+                          navigate(
+                            `/historia-clinica/${h.paciente_id}/${h.consulta_id}`
+                          )
+                        }
+                      >
+                        Ver
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody> 
           </table>
         </div>
       )}
     </div>
   );
-}
+} 

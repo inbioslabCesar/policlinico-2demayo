@@ -24,7 +24,7 @@ function TriageList() {
   // Refrescar lista de consultas y estados de triaje
   const recargarConsultas = () => {
     setLoading(true);
-    fetch(BASE_URL + "api_consultas.php")
+    fetch(BASE_URL + "api_consultas.php", {credentials: "include"})
       .then((res) => res.json())
       .then(async (data) => {
         if (data.success) {
