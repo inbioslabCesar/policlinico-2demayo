@@ -40,19 +40,36 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        // Listar medicamentos
-        $sql = "SELECT * FROM medicamentos ORDER BY nombre";
-        $result = $conn->query($sql);
+    // Buscar medicamentos por coincidencia
+    if (isset($_GET['busqueda']) && strlen($_GET['busqueda']) > 1) {
+        $busqueda = '%' . $_GET['busqueda'] . '%';
+        $stmt = $conn->prepare("SELECT * FROM medicamentos WHERE nombre LIKE ? OR codigo LIKE ? ORDER BY nombre");
+        $stmt->bind_param("ss", $busqueda, $busqueda);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $medicamentos = [];
         while ($row = $result->fetch_assoc()) {
-            // Formatear fecha_vencimiento como yyyy-mm-dd si existe
             if (isset($row['fecha_vencimiento']) && $row['fecha_vencimiento']) {
                 $row['fecha_vencimiento'] = date('Y-m-d', strtotime($row['fecha_vencimiento']));
             }
             $medicamentos[] = $row;
         }
         echo json_encode($medicamentos);
+        $stmt->close();
         break;
+    }
+    // Si no hay búsqueda, devuelve toda la lista (opcional)
+    $sql = "SELECT * FROM medicamentos ORDER BY nombre";
+    $result = $conn->query($sql);
+    $medicamentos = [];
+    while ($row = $result->fetch_assoc()) {
+        if (isset($row['fecha_vencimiento']) && $row['fecha_vencimiento']) {
+            $row['fecha_vencimiento'] = date('Y-m-d', strtotime($row['fecha_vencimiento']));
+        }
+        $medicamentos[] = $row;
+    }
+    echo json_encode($medicamentos);
+    break;
     case 'POST':
         // Crear o actualizar medicamento
         $data = json_decode(file_get_contents('php://input'), true);
